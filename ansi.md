@@ -97,7 +97,40 @@ fruits:
 ```
 💡 Tip: Always use 2 spaces for indentation. Do not use tabs.
 
+## 4. Ansible Inventory
+Inventory defines the systems managed by Ansible.
 
+### INI Format
+```ini
+[webservers]
+web1.example.com ansible_user=ubuntu
+web2.example.com ansible_user=ubuntu
+
+[dbservers]
+db1.example.com ansible_user=root
+```
+### YAML Format
+```yaml
+all:
+  children:
+    webservers:
+      hosts:
+        web1.example.com:
+        web2.example.com:
+    dbservers:
+      hosts:
+        db1.example.com:
+```
+### SSH Login Example
+```ini
+[webservers]
+10.0.1.10 ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/aws.pem\
+```
+### Command Example
+```bash
+ansible webservers -m ping
+```
+**-m ping:** Uses the ping module to check connectivity between Ansible and the target hosts.
 
 
 
