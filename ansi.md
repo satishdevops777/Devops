@@ -290,23 +290,18 @@ gather_facts: false
 ```Bash
 ansible localhost -m setup # Gather and print all facts
 ```
-9. Ansible Playbooks
+## 9. Ansible Playbooks
 Playbooks are YAML files that define sets of instructions for Ansible to follow. They allow you to orchestrate multiple tasks, control configuration, deploy applications, and much more.
 
-Playbook Structure:
-Play: Applies tasks to a group of hosts.
+### Playbook Structure:
+**Play:** Applies tasks to a group of hosts.
+**Task:** Executes a single module on the host.
+**Module:** The unit of work (like yum, apt, copy, etc.).
+**Handlers:** Triggered only when notified by a task.
+**Variables:** Provide dynamic input to tasks.
 
-Task: Executes a single module on the host.
-
-Module: The unit of work (like yum, apt, copy, etc.).
-
-Handlers: Triggered only when notified by a task.
-
-Variables: Provide dynamic input to tasks.
-
-Example:
-YAML
-
+### Example:
+```YAML
 - name: Install and configure NGINX
   hosts: webservers
   become: true
@@ -329,21 +324,19 @@ YAML
         rule: allow
         port: "{{ nginx_port }}"
         proto: tcp
+```
 This playbook installs NGINX, starts it, enables it on boot, and opens the port.
 
-10. Modules
+## 10. Modules
 Modules are the actual units of work in Ansible. Each task in a playbook invokes a module.
 
-Commonly Used Modules:
-System: user, group, service, hostname
+### Commonly Used Modules:
+**System:** user, group, service, hostname
+**Package:** apt, yum, dnf, pip
+**File:** copy, template, file, lineinfile
+**Command:** command, shell, script, raw
 
-Package: apt, yum, dnf, pip
-
-File: copy, template, file, lineinfile
-
-Command: command, shell, script, raw
-
-Example: File Module
+**Example:**  File Module
 ```YAML
 - name: Create a directory
   file:
@@ -352,7 +345,7 @@ Example: File Module
     owner: ubuntu
     mode: '0755'
 ```
-Example: Copy Module
+**Example:**  Copy Module
 ```YAML
 - name: Copy config file
   copy:
