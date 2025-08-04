@@ -40,10 +40,10 @@ Ansible is an open-source automation tool that helps in configuration management
 
 Ansible's behavior is controlled by configuration files.
 
-### Default Config File
+**Default Config File**
 `/etc/ansible/ansible.cfg`
 
-### Precedence Order
+**Precedence Order**
 Ansible reads configuration settings in a specific order, with later settings overriding earlier ones:
 
 1. `$ANSIBLE_CONFIG=/path/to/file` – Environment variable
@@ -51,7 +51,7 @@ Ansible reads configuration settings in a specific order, with later settings ov
 3. `~/.ansible.cfg` – User home directory
 4. `/etc/ansible/ansible.cfg` – Default system-wide config
 
-### Useful Commands
+**Useful Commands**
 
 ```bash
 ansible-config list   # Lists all Ansible configuration options with details
@@ -59,7 +59,7 @@ ansible-config view   # Shows the config file Ansible is currently using
 ansible-config dump   # Dumps the actual values used by Ansible, including overrides
 ```
 
-### Example: Set More Parallel Connections (forks)
+**Example:** Set More Parallel Connections (forks)
 
 **INI or TOML Format:**
 
@@ -70,7 +70,7 @@ host_key_checking = False
 retry_files_enabled = False
 ```
 
-### Explanation
+**Explanation**
 
 - `forks`: Determines how many hosts Ansible can connect to in parallel.
 - `host_key_checking`: Disables SSH prompt on first connection.
@@ -80,7 +80,7 @@ retry_files_enabled = False
 
 YAML is fundamental to Ansible, used for writing playbooks, inventories, and variable files.
 
-### Syntax Example
+**Syntax Example**
 
 ```yaml
 Fruit: Apple  # Key-Value
@@ -88,7 +88,7 @@ Vegetable: Carrot
 liquid: Water
 Meat: Chicken
 ```
-### List Example
+**List Example**
 ```yaml
 fruits:
   - Apple
@@ -100,7 +100,7 @@ fruits:
 ## 4. Ansible Inventory
 Inventory defines the systems managed by Ansible.
 
-### INI Format
+ **INI Format**
 ```ini
 [webservers]
 web1.example.com ansible_user=ubuntu
@@ -109,7 +109,7 @@ web2.example.com ansible_user=ubuntu
 [dbservers]
 db1.example.com ansible_user=root
 ```
-### YAML Format
+**YAML Format**
 ```yaml
 all:
   children:
@@ -121,12 +121,12 @@ all:
       hosts:
         db1.example.com:
 ```
-### SSH Login Example
+**SSH Login Example**
 ```ini
 [webservers]
 10.0.1.10 ansible_user=ec2-user ansible_ssh_private_key_file=~/.ssh/aws.pem\
 ```
-### Command Example
+**Command Example**
 ```bash
 ansible webservers -m ping
 ```
@@ -135,7 +135,7 @@ ansible webservers -m ping
 ## 5. Ansible Variables (with Examples)
 Variables make playbooks dynamic and reusable.
 
-### Defining Variables in Playbook 
+**Defining Variables in Playbook** 
 ```YAML
 - name: Print a message
   hosts: localhost
@@ -146,26 +146,26 @@ Variables make playbooks dynamic and reusable.
       debug:
         msg: "{{ greeting }}"
 ```
-### Defining Variables in Inventory
+**Defining Variables in Inventory**
 ```Ini
 [webservers]
 web1 ansible_host=192.168.1.100 app_port=8080
 ```
-### Defining in Group Vars
+**Defining in Group Vars**
 ```Ini
 [webservers:vars]
 app_name=myapp
 ```
-### Accessing in Playbook:
+**Accessing in Playbook:**
 ```YAML
 msg: "App name is {{ app_name }} and runs on port {{ app_port }}"
 ```
-### Boolean Example
+**Boolean Example**
 ```YAML
 vars:
   is_enabled: true
 ```
-### List and Dictionary
+**List and Dictionary**
 ```YAML
 vars:
   packages:
@@ -175,7 +175,7 @@ vars:
     name: devops
     shell: /bin/bash
 ```
-### Using Variables in a Loop
+**Using Variables in a Loop**
 ```YAML
 - name: Install packages
   apt:
@@ -198,7 +198,7 @@ You can capture the result of a task using register and use it later.
   debug:
     var: uptime_result.stdout # Displays the uptime output
 ```
-### Variable Precedence (from highest to lowest)
+**Variable Precedence (from highest to lowest)**
 1. Extra vars (ansible-playbook site.yml -e "var=value")
 2. Set facts
 3. Include vars (via include_vars)
@@ -216,7 +216,7 @@ ansible-playbook playbook.yml -e "env=production"
 ```
 This overrides any env variable defined elsewhere.
 
-### Variable Defined in Inventory
+**Variable Defined in Inventory**
 ```Ini
 [webservers:vars]
 dns_server=10.5.5.3
@@ -229,7 +229,7 @@ In this case, web1 uses 10.5.5.5 because the host-level variable overrides the g
 ## 7. Magic Variables and Scopes
 Magic variables are built-in Ansible variables that provide information about hosts, groups, and inventory structure.
 
-### Hostvars (Access data from other hosts)
+**Hostvars (Access data from other hosts)**
 ```YAML
 
 - name: Print DNS of another host
@@ -238,7 +238,7 @@ Magic variables are built-in Ansible variables that provide information about ho
 ```
 hostvars is a dictionary of host-specific variables.
 
-### Groups and Inventory
+**Groups and Inventory**
 ```YAML
 
 - name: Print all hosts in 'webservers'
@@ -253,29 +253,29 @@ hostvars is a dictionary of host-specific variables.
   debug:
     var: inventory_hostname
 ```
-### Facts from Another Host
+**Facts from Another Host**
 ```YAML
 - name: Print CPU info from web2
   debug:
     msg: "CPU: {{ hostvars['web2']['ansible_facts']['processor'][0] }}"
 ```
-### Scope Types:
+**Scope Types:**
 **Host Scope:** Variables tied to a specific host.
 **Play Scope:** Variables available only during a play.
 
 ## 8. Ansible Facts
 Facts are system data (hostname, IP, OS, etc.) gathered by Ansible from managed nodes.
 
-### Enable Fact Gathering (default)
+**Enable Fact Gathering (default)**
 ```YAML
 
 gather_facts: true
 ```
-### Disable Fact Gathering
+**Disable Fact Gathering**
 ```YAML
 gather_facts: false
 ```
-### Accessing Facts
+**Accessing Facts**
 ```YAML
 - name: Show default IP
   debug:
@@ -286,7 +286,7 @@ gather_facts: false
 **explicit:** Gather only when you write gather_facts: true.
 **smart:** Facts are reused unless missing.
 
-### Command Line:
+**Command Line:**
 ```Bash
 ansible localhost -m setup # Gather and print all facts
 ```
@@ -300,7 +300,7 @@ Playbooks are YAML files that define sets of instructions for Ansible to follow.
 **Handlers:** Triggered only when notified by a task.
 **Variables:** Provide dynamic input to tasks.
 
-### Example:
+**Example:**
 ```YAML
 - name: Install and configure NGINX
   hosts: webservers
@@ -360,7 +360,7 @@ Modules are the actual units of work in Ansible. Each task in a playbook invokes
     dest: /etc/nginx/nginx.conf
 ```
 Templates allow variable substitution using Jinja2 syntax:
-### Nginx
+**Nginx**
 ```yaml
 server {
     listen {{ nginx_port }};
@@ -371,26 +371,26 @@ server {
 ## 11. Playbook Execution Modes
 These modes help you test your playbooks safely before applying changes.
 
-### Check Mode (Dry Run)
+**Check Mode (Dry Run)**
 ```Bash
 ansible-playbook site.yml --check
 ```
 This simulates the execution and shows what changes would happen without making any actual changes.
 
-### Diff Mode (Show Before/After Changes)
+**Diff Mode (Show Before/After Changes)**
 ```Bash
 ansible-playbook site.yml --diff
 ```
 Useful for file-based tasks (e.g., template, lineinfile) to show differences.
 
-### Syntax Check
+**Syntax Check**
 ```Bash
 ansible-playbook site.yml --syntax-check
 ```
 Validates the YAML structure of your playbook.
 
 ## 12. Loops & Conditionals
-### Simple Loop (List)
+**Simple Loop (List)**
 ```YAML
 - name: Install packages
   apt:
@@ -401,7 +401,7 @@ Validates the YAML structure of your playbook.
     - curl
     - htop
 ```
-### Loop with Dictionary
+**Loop with Dictionary**
 ```YAML
 - name: Create users
   user:
@@ -411,7 +411,7 @@ Validates the YAML structure of your playbook.
     - { name: alice, uid: 1001 }
     - { name: bob, uid: 1002 }
 ```
-### Legacy Loop with with_items
+**Legacy Loop with with_items**
 ```YAML
 - name: Install packages (legacy)
   apt:
@@ -421,7 +421,7 @@ Validates the YAML structure of your playbook.
     - git
     - curl
 ```
-### Using Conditions
+**Using Conditions**
 ```YAML
 - name: Restart service if enabled
   service:
@@ -459,7 +459,7 @@ Handlers are triggered only if the task using notify reports a change. If the ta
 Roles are structured directories that allow easy reuse and sharing of automation content.
 
 ### Role Directory Layout:
-```
+```yaml
 roles/
   apache/
     tasks/
@@ -473,29 +473,29 @@ roles/
     defaults/
       main.yml
 ```
-### Create a Role:
+**Create a Role:**
 ```Bash
 ansible-galaxy init apache
 ```
-### Use a Role in Playbook:
+**Use a Role in Playbook:**
 ```YAML
 - name: Deploy web server
   hosts: webservers
   roles:
     - apache
 ```
-### Install a Public Role:
+**Install a Public Role:**
 ```Bash
 ansible-galaxy install geerlingguy.apache
 ```
 ## 15. Collections
 Collections are packages that bundle modules, roles, and plugins together.
 
-### Install a Collection:
+**Install a Collection:**
 ```Bash
 ansible-galaxy collection install community.general
 ```
-### Use Modules from a Collection:
+**Use Modules from a Collection:**
 ```YAML
 - name: Use sysctl from community.general
   community.general.sysctl:
@@ -506,16 +506,17 @@ ansible-galaxy collection install community.general
 ## 16. Templating with Jinja2
 Templating in Ansible is done using the Jinja2 engine. You can embed variables and expressions inside templates, which are typically used with the template module.
 
-### Template File Example (nginx.conf.j2):
-**Nginx**
+**Template File Example (nginx.conf.j2):**
+
 ```
+# Nginx
 server {
     listen {{ nginx_port }};
     server_name {{ server_name }};
     root {{ document_root }};
 }
 ```
-### Template Task in Playbook:
+**Template Task in Playbook:**
 ```YAML
 
 - name: Deploy NGINX config
@@ -523,7 +524,7 @@ server {
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
 ```
-### Common Filters in Jinja2:
+**Common Filters in Jinja2:**
 ```
 {{ user_name | upper }}             # Converts to uppercase
 {{ list_of_users | join(', ') }}    # Joins list with comma
@@ -532,25 +533,25 @@ server {
 ## 17. Environment Setup (Local Dev/Test)
 You can simulate Ansible environments using tools like:
 
-### 1. Vagrant
+**1. Vagrant**
 Used to create reproducible local environments.
 ```Bash
 vagrant init ubuntu/bionic64
 vagrant up
 ```
-### 2. Docker
+**2. Docker**
 Run containers for testing roles or modules.
 
 ```Bash
 docker run -it ubuntu:latest bash
 ```
-### 3. VMware/VirtualBox
+**3. VMware/VirtualBox**
 Useful for simulating real infrastructure with virtual machines.
 
 ## 18. Variable File Separation
 You can store variables in separate files for better organization.
 
-### Using vars_files:
+**Using vars_files:**
 ```YAML
 - name: Example with vars file
   hosts: localhost
@@ -561,7 +562,7 @@ You can store variables in separate files for better organization.
       debug:
         msg: "{{ welcome_message }}"
 ```
-### Using host_vars and group_vars:
+**Using host_vars and group_vars:**
 Create directories named host_vars/ and group_vars/ in the same directory as your playbook.
 
 Add YAML files with the hostname or group name inside these directories.
@@ -594,17 +595,17 @@ Some tasks take a long time to run (e.g., backups, updates). You can run them as
 ## 20. Strategy
 Defines how Ansible runs tasks across hosts.
 
-### Linear Strategy (default)
+**Linear Strategy (default)**
 ```YAML
 strategy: linear
 ```
 Runs tasks on one host at a time, in order.
 
-### Free Strategy
+**Free Strategy**
 ```YAML
 strategy: free #Runs tasks on all hosts as soon as they’re ready.
 ```
-### Serial (batch execution)
+**Serial (batch execution)**
 ```YAML
 serial: 3 #Run 3 hosts at a time.
 ```
@@ -620,31 +621,31 @@ You can control task behavior on failure.
     state: stopped
   ignore_errors: yes
 ```
-### Fail only if custom condition is true
+**Fail only if custom condition is true**
 ```YAML
 - name: Conditional failure
   command: some_command
   register: cmd_out
   failed_when: cmd_out.rc != 0
 ```
-### Stop all on error
+**Stop all on error**
 ```YAML
 any_errors_fatal: true
 ```
 ## 22. Ansible Vault
 Encrypt secrets like API keys, passwords, and certificates.
 
-### Encrypt a file:
+**Encrypt a file:**
 ```Bash
 ansible-vault encrypt secrets.yml
 ```
-### Decrypt/view/edit:
+**Decrypt/view/edit:**
 ```Bash
 ansible-vault decrypt secrets.yml
 ansible-vault view secrets.yml
 ansible-vault edit secrets.yml
 ```
-### Use in playbook:
+**Use in playbook:**
 ```Bash
 ansible-playbook site.yml --ask-vault-pass
 ansible-playbook site.yml --vault-password-file ~/.vault_pass.txt
@@ -658,12 +659,12 @@ Plugins extend Ansible’s core functionality.
 **Lookup:** Read external data (e.g., CSV, files).
 **Filter:** Custom Jinja2 filters.
 
-### Set custom plugin paths:
+**Set custom plugin paths:**
 ```Bash
 export ANSIBLE_FILTER_PLUGINS=/custom/filter_plugins
 export ANSIBLE_STDOUT_CALLBACK=json
 ```
-### Lookup Example:
+**Lookup Example:**
 ```YAML
 - name: Read a value from CSV
   debug:
@@ -672,7 +673,7 @@ export ANSIBLE_STDOUT_CALLBACK=json
 ## 24. Tags
 Tags allow you to run part of a playbook.
 
-### Tag a task:
+**Tag a task:**
 ```YAML
 - name: Install NGINX
   apt:
@@ -682,11 +683,11 @@ Tags allow you to run part of a playbook.
     - web
     - nginx
 ```
-### Run only tagged tasks:
+**Run only tagged tasks:**
 ```Bash
 ansible-playbook web.yml --tags nginx
 ```
-### Skip tagged tasks:
+**Skip tagged tasks:**
 ```Bash
 ansible-playbook web.yml --skip-tags debug
 ```
