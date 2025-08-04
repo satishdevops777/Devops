@@ -1,3 +1,129 @@
+# Ansible - Complete Guide
+
+Ansible is an open-source automation tool that helps in configuration management, application deployment, task automation, and orchestration.
+
+---
+
+## Key Features
+
+* **Agentless**: Uses SSH or WinRM for communication, no agents needed on managed nodes.
+* **Simple Syntax**: Employs YAML for human-readable playbooks.
+* **Idempotent**: Ensures tasks only make changes when necessary, preventing unintended side effects.
+* **Powerful & Scalable**: Suitable for everything from small personal setups to large enterprise deployments.
+
+---
+
+## 1. Ansible Core Concepts
+
+### 1.1 Automation Areas
+
+* **Provisioning**: Setting up servers or cloud resources (e.g., launching AWS EC2 instances).
+* **Configuration Management**: Ensuring servers are configured to a defined state (e.g., NGINX installed, SSH configured).
+* **Continuous Delivery**: Automating builds and deployments via pipelines.
+* **App Deployment**: Rolling out applications and dependencies across environments.
+* **Security Compliance**: Enforcing baseline OS-level security (e.g., disable root SSH, set correct permissions).
+
+### Example: Provisioning a Web Server
+
+```yaml
+- name: Provision NGINX on Ubuntu
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+```
+
+## 2. Configuration Files
+
+Ansible's behavior is controlled by configuration files.
+
+### Default Config File
+`/etc/ansible/ansible.cfg`
+
+### Precedence Order
+Ansible reads configuration settings in a specific order, with later settings overriding earlier ones:
+
+1. `$ANSIBLE_CONFIG=/path/to/file` – Environment variable
+2. `./ansible.cfg` – Local directory
+3. `~/.ansible.cfg` – User home directory
+4. `/etc/ansible/ansible.cfg` – Default system-wide config
+
+### Useful Commands
+
+```bash
+ansible-config list   # Lists all Ansible configuration options with details
+ansible-config view   # Shows the config file Ansible is currently using
+ansible-config dump   # Dumps the actual values used by Ansible, including overrides
+```
+
+### Example: Set More Parallel Connections (forks)
+
+**INI or TOML Format:**
+
+```ini
+[defaults]
+forks = 10
+host_key_checking = False
+retry_files_enabled = False
+```
+
+### Explanation
+
+- `forks`: Determines how many hosts Ansible can connect to in parallel.
+- `host_key_checking`: Disables SSH prompt on first connection.
+- `retry_files_enabled`: Disables creation of `.retry` files.
+
+## 3. YAML (Yet Another Markup Language)
+
+YAML is fundamental to Ansible, used for writing playbooks, inventories, and variable files.
+
+### Syntax Example
+
+```yaml
+Fruit: Apple  # Key-Value
+Vegetable: Carrot
+liquid: Water
+Meat: Chicken
+```
+### List Example
+```yaml
+fruits:
+  - Apple
+  - Banana
+  - Mango
+```
+💡 Tip: Always use 2 spaces for indentation. Do not use tabs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Ansible - Complete Guide
 
 Ansible is an open-source automation tool that helps in configuration management, application deployment, task automation, and orchestration.
