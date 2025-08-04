@@ -132,8 +132,248 @@ ansible webservers -m ping
 ```
 **-m ping:** Uses the ping module to check connectivity between Ansible and the target hosts.
 
+## 5. Ansible Variables (with Examples)
+Variables make playbooks dynamic and reusable.
 
+### Defining Variables in Playbook 
+```YAML
+- name: Print a message
+  hosts: localhost
+  vars:
+    greeting: "Hello from Ansible!"
+  tasks:
+    - name: Display variable
+      debug:
+        msg: "{{ greeting }}"
+```
+### Defining Variables in Inventory
+```Ini
+[webservers]
+web1 ansible_host=192.168.1.100 app_port=8080
+```
+### Defining in Group Vars
+```Ini
+[webservers:vars]
+app_name=myapp
+```
+### Accessing in Playbook:
+```YAML
+msg: "App name is {{ app_name }} and runs on port {{ app_port }}"
+```
+### Boolean Example
+```YAML
+vars:
+  is_enabled: true
+```
+### List and Dictionary
+```YAML
+vars:
+  packages:
+    - nginx
+    - git
+  user:
+    name: devops
+    shell: /bin/bash
+```
+### Using Variables in a Loop
+```YAML
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ packages }}"
+```
+## 6. Registering Variables and Variable Precedence
+### Register Output of a Task
+You can capture the result of a task using register and use it later.
 
+**Example:**
+
+```YAML
+- name: Get the uptime of the system
+  command: uptime
+  register: uptime_result
+
+- name: Print result
+  debug:
+    var: uptime_result.stdout # Displays the uptime output
+```
+### Variable Precedence (from highest to lowest)
+1. Extra vars (ansible-playbook site.yml -e "var=value")
+2. Set facts
+3. Include vars (via include_vars)
+4. Role vars (defined within a role)
+5. Play vars (inside the playbook vars: section)
+6. Host facts (discovered via setup)
+7. Host vars (defined in host_vars/ or inventory)
+8. Group vars (defined in group_vars/ or inventory)
+9. Role defaults (lowest priority)
+
+**Example:**
+
+```Bash
+ansible-playbook playbook.yml -e "env=production"
+```
+This overrides any env variable defined elsewhere.
+
+### Variable Defined in Inventory
+```Ini
+[webservers:vars]
+dns_server=10.5.5.3
+
+[webservers]
+web1 ansible_host=172.20.1.100 dns_server=10.5.5.5
+```
+In this case, web1 uses 10.5.5.5 because the host-level variable overrides the group-level.
+
+## 7. Magic Variables and Scopes
+Magic variables are built-in Ansible variables that provide information about hosts, groups, and inventory structure.
+
+### Hostvars (Access data from other hosts)
+```YAML
+
+- name: Print DNS of another host
+  debug:
+    msg: "DNS of web2: {{ hostvars['web2'].dns_server }}"
+```
+hostvars is a dictionary of host-specific variables.
+
+### Groups and Inventory
+```YAML
+
+- name: Print all hosts in 'webservers'
+  debug:
+    var: groups['webservers']
+
+- name: Print the groups of current host
+  debug:
+    var: group_names
+
+- name: Print the name of the host
+  debug:
+    var: inventory_hostname
+```
+### Facts from Another Host
+```YAML
+- name: Print CPU info from web2
+  debug:
+    msg: "CPU: {{ hostvars['web2']['ansible_facts']['processor'][0] }}"
+```
+### Scope Types:
+**Host Scope:** Variables tied to a specific host.
+**Play Scope:** Variables available only during a play.
+
+## 8. Ansible Facts
+Facts are system data (hostname, IP, OS, etc.) gathered by Ansible from managed nodes.
+
+### Enable Fact Gathering (default)
+```YAML
+
+gather_facts: true
+```
+### Disable Fact Gathering
+```YAML
+gather_facts: false
+```
+### Accessing Facts
+```YAML
+- name: Show default IP
+  debug:
+    msg: "Default IPv4: {{ ansible_default_ipv4.address }}"
+```
+### Gathering Modes (via config or ansible.cfg)
+**implicit:** Default, facts gathered unless turned off.
+**explicit:** Gather only when you write gather_facts: true.
+**smart:** Facts are reused unless missing.
+
+### Command Line:
+```Bash
+ansible localhost -m setup # Gather and print all facts
+```
+9. Ansible Playbooks
+Playbooks are YAML files that define sets of instructions for Ansible to follow. They allow you to orchestrate multiple tasks, control configuration, deploy applications, and much more.
+
+Playbook Structure:
+Play: Applies tasks to a group of hosts.
+
+Task: Executes a single module on the host.
+
+Module: The unit of work (like yum, apt, copy, etc.).
+
+Handlers: Triggered only when notified by a task.
+
+Variables: Provide dynamic input to tasks.
+
+Example:
+YAML
+
+- name: Install and configure NGINX
+  hosts: webservers
+  become: true
+  vars:
+    nginx_port: 80
+  tasks:
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+
+    - name: Ensure NGINX is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Open firewall port
+      ufw:
+        rule: allow
+        port: "{{ nginx_port }}"
+        proto: tcp
+This playbook installs NGINX, starts it, enables it on boot, and opens the port.
+
+10. Modules
+Modules are the actual units of work in Ansible. Each task in a playbook invokes a module.
+
+Commonly Used Modules:
+System: user, group, service, hostname
+
+Package: apt, yum, dnf, pip
+
+File: copy, template, file, lineinfile
+
+Command: command, shell, script, raw
+
+Example: File Module
+```YAML
+- name: Create a directory
+  file:
+    path: /opt/myapp
+    state: directory
+    owner: ubuntu
+    mode: '0755'
+```
+Example: Copy Module
+```YAML
+- name: Copy config file
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+```
+**Example:** Template Module (with Jinja2)
+```YAML
+- name: Deploy nginx config
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+```
+Templates allow variable substitution using Jinja2 syntax:
+### Nginx
+```yaml
+server {
+    listen {{ nginx_port }};
+    server_name {{ server_name }};
+}
+```
 
 
 
