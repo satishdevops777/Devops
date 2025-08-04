@@ -260,9 +260,10 @@ hostvars is a dictionary of host-specific variables.
     msg: "CPU: {{ hostvars['web2']['ansible_facts']['processor'][0] }}"
 ```
 **Scope Types:**
+```
 **Host Scope:** Variables tied to a specific host.
 **Play Scope:** Variables available only during a play.
-
+```
 ## 8. Ansible Facts
 Facts are system data (hostname, IP, OS, etc.) gathered by Ansible from managed nodes.
 
@@ -281,11 +282,12 @@ gather_facts: false
   debug:
     msg: "Default IPv4: {{ ansible_default_ipv4.address }}"
 ```
-### Gathering Modes (via config or ansible.cfg)
-**implicit:** Default, facts gathered unless turned off.
-**explicit:** Gather only when you write gather_facts: true.
-**smart:** Facts are reused unless missing.
-
+**Gathering Modes** (via config or ansible.cfg)
+```
+implicit: Default, facts gathered unless turned off.
+explicit: Gather only when you write gather_facts: true.
+smart: Facts are reused unless missing.
+```
 **Command Line:**
 ```Bash
 ansible localhost -m setup # Gather and print all facts
