@@ -657,8 +657,11 @@ Plugins extend Ansible’s core functionality.
 
 ### Types:
 **Callback:** Format output (e.g., json, yaml, minimal).
+
 **Connection:** SSH, WinRM, local.
+
 **Lookup:** Read external data (e.g., CSV, files).
+
 **Filter:** Custom Jinja2 filters.
 
 **Set custom plugin paths:**
