@@ -1,7 +1,3 @@
-from pathlib import Path
-
-# Define the corrected and structured content for the README.md file
-readme_content = """
 # Networking Concepts
 
 ## LAN (Local Area Network)
