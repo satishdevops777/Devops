@@ -1,4 +1,6 @@
-# Python Basics: Data Types, Strings, Slicing, and String Methods
+# Python  
+
+# Data Types, Strings, Slicing, and String Methods
 
 ---
 
