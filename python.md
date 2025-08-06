@@ -13,10 +13,6 @@ Numeric types are used to store numerical values.
 
 - **float**: Represents floating-point numbers, which are numbers with a decimal point.  
   Example: `pi = 3.14`, `price = 19.99`
-
-- **complex**: Represents complex numbers, which have a real and an imaginary part, written with 'j' or 'J' as the imaginary unit.  
-  Example: `c = 5 + 2j`
-
 ```python
 x = 5           # int
 y = 3.14        # float
@@ -24,13 +20,16 @@ print(type(x))  # <class 'int'>
 print(type(y))  # <class 'float'>
 ```
 
+- **complex**: Represents complex numbers, which have a real and an imaginary part, written with 'j' or 'J' as the imaginary unit.  
+  Example: `c = 5 + 2j`
+
+
 ### Text Type 📝
 
 The text type, called strings, is used to store sequences of characters.
 
 - **str**: Represents a string, which is an immutable sequence of characters enclosed in single quotes (`'...'`), double quotes (`"..."`), or triple quotes (`'''...'''` or `"""..."""`).  
 Example: 
-
 ```python
 `name = "Alice"`, `message = 'Hello, World!'`
 name = "Satish"
@@ -44,26 +43,26 @@ Example: `message[0]` would give `'H'`.
 Sequence types are ordered collections of items.
 
 - **list**: A list is an ordered, mutable collection of items. This means you can change, add, or remove items after the list is created. Lists are defined using square brackets `[]`.  
-  Example: 
-  ```python
-  fruits = ["apple", "banana", "cherry"]
-  mylist = ["one", "two", "three"]
-  mylist[1] = "updated"
-  print(mylist)
-  ```
+Example: 
+```python
+fruits = ["apple", "banana", "cherry"]
+mylist = ["one", "two", "three"]
+mylist[1] = "updated"
+print(mylist)
+```
 Nested List Indexing:
-  ```python
-  nested = [1, 1, [1, 2]]
-  print(nested[2][1])  # Output: 2
-  ```
+```python
+nested = [1, 1, [1, 2]]
+print(nested[2][1])  # Output: 2
+```
 - **tuple**: A tuple is an ordered, immutable collection of items. Once created, you cannot change its elements. Tuples are defined using parentheses `()`. They are generally used for data that shouldn't change.  
 Example:
-  ```python
-  coordinates = (10.0, 20.0)
-  t = ('a', 'b', 'c')
-  print(t.count('a'))  # Count of 'a'
-  print(t.index('c'))  # Index of 'c'
-  ```
+```python
+coordinates = (10.0, 20.0)
+t = ('a', 'b', 'c')
+print(t.count('a'))  # Count of 'a'
+print(t.index('c'))  # Index of 'c'
+```
 - **range**: Represents a sequence of numbers, often used in loops. The `range()` function generates a sequence of numbers and is immutable.  
   Example: `for i in range(5):` generates numbers from 0 up to (but not including) 5.
 
@@ -72,19 +71,19 @@ Example:
 Mapping types store data in key-value pairs.
 
 - **dict**: A dictionary is an unordered, mutable collection of items. Each item is a key-value pair. Dictionaries are defined using curly braces `{}`. Keys must be unique and immutable (like strings or numbers), while values can be of any type.  
-  Example:
-  ```python
-  person = {"name": "Bob", "age": 25}`
-  # You access values using their keys: `person["name"]` would give `'Bob'`.
+Example:
+```python
+person = {"name": "Bob", "age": 25}`
+# You access values using their keys: `person["name"]` would give `'Bob'`.
   
-  my_dict = {'k1': 'v1', 'k2': ['v2', 'v3']}
-  print(my_dict['k2'][1])
+my_dict = {'k1': 'v1', 'k2': ['v2', 'v3']}
+print(my_dict['k2'][1])
   
-  # Retrieve keys, values, and items:
-  print(my_dict.keys())
-  print(my_dict.values())
-  print(my_dict.items())
-  ```
+# Retrieve keys, values, and items:
+print(my_dict.keys())
+print(my_dict.values())
+print(my_dict.items())
+```
 
 
 ### Set Types 🧩
@@ -92,21 +91,21 @@ Mapping types store data in key-value pairs.
 Set types are unordered collections of unique items.
 
 - **set**: A set is an unordered, mutable collection of unique items. Duplicate elements are automatically removed. Sets are defined using curly braces `{}` or the `set()` function.  
-  Example:
-  ```python
-  colors = {"red", "green", "blue"}`
-  mylist = [1, 2, 2, 3]
-  print(set(mylist))  # Output: {1, 2, 3}
-  ```
+Example:
+```python
+colors = {"red", "green", "blue"}`
+mylist = [1, 2, 2, 3]
+print(set(mylist))  # Output: {1, 2, 3}
+```
 - **frozenset**: A `frozenset` is an immutable version of a set. Once created, you cannot add or remove items. This makes them hashable, so they can be used as keys in a dictionary.  
-  Example: `immutable_set = frozenset([1, 2, 3])`
+Example: `immutable_set = frozenset([1, 2, 3])`
 
 ### Boolean Type ✅
 
 The Boolean type represents truth values.
 
 - **bool**: Represents a Boolean value, which can only be `True` or `False`. These are often the result of comparison operations.  
-  Example:
+Example:
 ```python
 is_adult = True
 is_senior = False
@@ -293,10 +292,101 @@ print(f'My name is {name}')  # My name is rockstar
 
 ---
 
+## 📘 5. File I/O in Python
 
+File I/O (Input/Output) in Python refers to reading from and writing to files on your computer's storage. It's a fundamental concept that allows programs to interact with external data sources. The process involves three main steps: opening a file, performing operations (reading or writing), and closing the file.
 
+### 1. Opening a File 📂
+To work with a file, you first need to open it. The open() function is used for this purpose. It takes two primary arguments: the file path and the mode.
 
+```Python
 
+file = open("example.txt", "w")
+```
+The second argument, the mode, specifies what you intend to do with the file.
+
+**'r' (Read):** Opens a file for reading. The file must exist. This is the default mode.
+
+**'w' (Write):** Opens a file for writing. It creates a new file if one doesn't exist, or overwrites the contents of an existing file. Be careful with this mode!
+
+**'a' (Append):** Opens a file for appending. It creates a new file if one doesn't exist, but if it does, it adds new content to the end of the file without overwriting.
+
+**'x' (Create):** Creates a new file. If the file already exists, the operation fails with a FileExistsError.
+
+**'t' (Text):** Opens in text mode. This is the default.
+
+**'b' (Binary):** Opens in binary mode, for working with non-text files like images or executables.
+
+You can combine modes, for example, 'rb' for reading a binary file.
+
+### 2. Reading and Writing Files ✍️
+Once a file is open, you can perform I/O operations.
+
+**Writing to a File**
+You use the .write() method to write data to an open file. It's important to note that you must provide the data as a string.
+
+```Python
+
+# Open the file in write mode
+file = open("notes.txt", "w")
+
+# Write a single line
+file.write("Hello, this is my first line.\n")
+
+# Write another line
+file.write("This is the second line.")
+
+# Don't forget to close the file!
+file.close()
+```
+**Reading from a File**
+There are a few common ways to read data from a file:
+
+**.read():** Reads the entire contents of the file as a single string.
+
+**.readline():** Reads a single line from the file.
+
+**.readlines():** Reads all lines from the file and returns them as a list of strings.
+
+Here’s an example using these methods:
+
+```Python
+
+# Open the file in read mode
+file = open("notes.txt", "r")
+
+# Read the entire content
+content = file.read()
+print(content)
+
+# To read line by line, you can use a for loop (most common method)
+# This is a very efficient way to handle large files.
+for line in file:
+    print(line)
+
+# Don't forget to close the file!
+file.close()
+```
+### 3. Closing a File 🔒
+After you're done with a file, it's crucial to close it using the .close() method. This frees up system resources and ensures that all changes are saved. Failing to close a file can lead to data loss or other issues.
+
+***Best Practice: The with Statement** ✅
+A more reliable and recommended way to handle files is using the with statement. This approach automatically handles closing the file, even if errors occur. It's cleaner and safer than manually calling .close().
+
+```Python
+
+# Writing to a file using 'with'
+with open("shopping_list.txt", "w") as f:
+    f.write("Milk\n")
+    f.write("Bread\n")
+    f.write("Eggs\n")
+
+# Reading from the same file using 'with'
+with open("shopping_list.txt", "r") as f:
+    for item in f:
+        print(item.strip()) # .strip() removes leading/trailing whitespace, including the newline character
+
+```
 
 
 
