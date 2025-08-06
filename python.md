@@ -388,8 +388,403 @@ with open("shopping_list.txt", "r") as f:
 
 ```
 
+## 📘 6.Comparison Operators in Python
+Comparison operators are used to compare two values and evaluate them to a Boolean result: True or False. These operators are fundamental for making decisions in code, such as in conditional statements and loops.
+
+**Basic Comparison Operators**
+Operator	Name	Example	Result
+==	Equal	5 == 5	True
+!=	Not equal	5 != 3	True
+>	Greater than	5 > 3	True
+<	Less than	5 < 3	False
+>=	Greater than or equal to	5 >= 5	True
+<=	Less than or equal to	5 <= 3	False
+
+Export to Sheets
+Examples in Code
+Here are some practical examples of how comparison operators work.
+
+**Using Integers and Floats**
+Comparison operators can be used with both integers and floats.
+
+```Python
+
+x = 10
+y = 20
+z = 10.0
+
+print(x == y)   # False
+print(x < y)    # True
+print(x >= z)   # True (10 is equal to 10.0)
+print(x != z)   # False (10 is not unequal to 10.0)
+```
+**Using Strings**
+Strings can also be compared. The comparison is based on lexicographical order (alphabetical order).
+
+```Python
+
+str1 = "apple"
+str2 = "banana"
+
+print(str1 == str2)    # False
+print(str1 < str2)     # True ('a' comes before 'b')
+print("cat" > "car")   # True ('t' comes after 'r')
+```
+Chaining Comparison Operators
+You can chain multiple comparison operators together for a more compact expression. This is a unique feature of Python.
+
+```Python
+
+x = 5
+
+print(1 < x < 10)  # True (This is equivalent to: (1 < x) and (x < 10))
+print(1 > x < 10)  # False (1 > 5 is False)
+```
+**Identity vs. Equality**
+It is important to distinguish between equality (==) and identity (is).
+
+== checks if the values of two objects are equal.
+
+is checks if two variables refer to the exact same object in memory.
+
+```Python
+
+list1 = [1, 2, 3]
+list2 = [1, 2, 3]
+list3 = list1
+
+print(list1 == list2)  # True (The values are equal)
+print(list1 is list2)  # False (They are separate objects in memory)
+print(list1 is list3)  # True (list3 is a reference to the same object as list1)
+
+```
 
 
+
+## 📘 7. Conditional Statements
+Conditional statements let your program make decisions based on specific conditions. The primary structure uses if, elif (else if), and else.
+
+```Python
+
+if 3 > 2:
+    print('Its true')
+
+# The `if-else` structure
+hungry = False
+if hungry:
+    print('Feed me')
+else:
+    print('I am not hungry')
+
+# The `if-elif-else` structure
+loc = 'School'
+if loc == 'School':
+    print(f'{loc} is mine')
+elif loc == 'hostel':
+    print('I own the hostel')
+else:
+    print('nothing')
+```
+
+## 📘 8. Loops
+Loops are used to repeatedly execute a block of code.
+
+**For Loop**
+The for loop iterates over a sequence (like a list, string, or range).
+
+```Python
+
+mylist = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+for num in mylist:
+    print(num)
+
+# Using a for loop with a conditional statement
+for num in mylist:
+    if num % 2 == 0:
+        print(f'even num: {num}')
+    else:
+        print(f'Odd number: {num}')
+
+# Summing items in a list (Note: The user's example had a typo, here's the corrected version)
+list_sum = 0
+for num in mylist:
+    list_sum = list_sum + num
+    print(list_sum)
+
+# Iterating through a string
+mystring = 'Hello World'
+for letter in mystring:
+    print('Cool!')
+
+# Iterating through a tuple
+tup = (1, 2, 3)
+for item in tup:
+    print(item)
+
+# Tuple unpacking with a for loop
+mylist = [(1, 3), (5, 7), (8, 9)]
+print(len(mylist))
+for (a, b) in mylist:
+    print(a)
+
+# Iterating through a dictionary
+dic = {'k1': 2, 'k2': 3, 'k3': 5}
+for key, value in dic.items():
+    print(key, value)
+```
+**While Loop**
+While loops will continue to execute a block of code while some condition remains true.
+
+Syntax:
+
+```Python
+
+while some_boolean_condition:
+    # Do something
+# A while loop can also have an optional else block.
+
+
+while some_boolean_condition:
+    # Do something
+else:
+    # Do something
+
+
+x = 0
+while x < 5:
+    print(f'The current value of x is {x}')
+    x = x + 1  # or x += 1
+else:
+    print("X is not less than 5")
+```
+**Loop Control: break, continue, pass**
+**break:** Breaks out of the current closest enclosing loop.
+Example: break
+```Python
+
+mystr = 'sammy'
+for letter in mystr:
+    if letter == 'a':
+        break
+    print(letter)
+
+x = 0
+while x < 10:
+    if x == 6:
+        break
+    print(x)
+    x += 1
+```
+**continue:** Goes to the top of the closest enclosing loop.
+Example: continue
+
+```Python
+
+mystr = 'sammy'
+for letter in mystr:
+    if letter == 'a':
+        continue
+    print(letter)
+```
+**pass:** Does nothing at all.
+
+Example: pass
+
+```Python
+
+x = [1, 2, 3]
+for item in x:
+    # with pass we can avoid syntax error for an empty loop
+    pass
+print('end of my script')
+```
+
+
+## 📘 9. Useful Operators in Python
+Python has many built-in functions and operators that simplify common tasks.
+
+**range()**
+The range() function generates a sequence of numbers.
+
+```Python
+
+# range(stop) - generates numbers from 0 up to stop-1
+for num in range(10):
+    print(num)
+
+# range(start, stop)
+for num in range(3, 10):
+    print(num)
+
+# range(start, stop, step)
+for num in range(0, 10, 2):
+    print(num)
+
+# Converting range to a list
+print(list(range(0, 11, 2)))
+```
+**enumerate()**
+The enumerate() function provides both an index and a value during a loop.
+
+```Python
+
+index_count = 0
+for letter in 'abcde':
+    print('At index {} the letter is {}'.format(index_count, letter))
+    index_count += 1
+
+# The same task using enumerate
+word = 'abcde'
+for index, letter in enumerate(word):
+    print(index)
+    print(letter)
+    print('\n')
+```
+**zip()**
+The zip() function combines multiple iterables into an iterator of tuples.
+
+```Python
+
+mylist1 = [1, 2, 3]
+mylist2 = ['a', 'b', 'c']
+for item in zip(mylist1, mylist2):
+    print(item)
+
+# If lists are of different lengths, zip stops at the shortest one
+mylist1 = [1, 2, 3, 5, 6]
+mylist2 = ['a', 'b', 'c']
+for item in zip(mylist1, mylist2):
+    print(item)
+```
+**in Operator (Membership)**
+The in operator checks if an item is in a sequence.
+
+```Python
+
+print('x' in ['x', 'y', 'z'])
+print('a' in 'a word')
+print('mykey' in {'mykey': 345})
+```
+**min() and max()**
+These functions find the smallest and largest values in an iterable.
+
+```Python
+mylist1 = [1, 2, 3, 5, 6]
+print(min(mylist1))
+print(max(mylist1))
+```
+**random Module**
+The random module is used for generating random values.
+
+```Python
+
+from random import shuffle, randint
+
+mylist = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+shuffle(mylist)
+print(mylist) # Prints a shuffled version of the list
+
+my_num = randint(0, 1000)
+print(my_num) # Prints a random integer between 0 and 1000
+```
+**input()**
+The input() function prompts the user for a value and returns it as a string.
+
+```Python
+result = input('Enter a number here: ')
+print(result)
+```
+## 📘 10. List Comprehensions
+List comprehensions are a unique and concise way to quickly create a list in Python. They are often more readable and efficient than a traditional for loop.
+
+```Python
+
+# Traditional approach
+mystring = 'Hello'
+mylist = []
+for letter in mystring:
+    mylist.append(letter)
+
+# List comprehension equivalent
+mylist = [letter for letter in mystring]
+
+# Creating a list of squares
+mylist = [num**2 for num in range(0, 11)]
+
+# Creating a list with a conditional filter
+mylist = [num for num in range(0, 11) if num % 2 == 0]
+
+# Converting Celsius to Fahrenheit
+celcius = [0, 10, 20, 30]
+fahr = [(9/5) * temp + 32 for temp in celcius]
+print(fahr)
+
+# Nested List Comprehensions
+mylist = [x * y for x in [2, 4, 6] for y in [100, 200, 300]]
+```
+
+## 📘 11. Methods and Functions
+**def Keyword**
+Functions are blocks of reusable code created using the def keyword. Good function names use snake casing (lowercase letters with underscores).
+
+```Python
+
+def name_of_function():
+    """
+    Docstring: This is where the function's explanation goes.
+    """
+    print("Hello")
+name_of_function()
+```
+The return keyword is typically used to send a result back from the function, which allows you to assign the output to a variable.
+
+```Python
+
+# Function that just prints
+def print_result(a, b):
+    print(a + b)
+print_result(10, 20) # Output: 30
+
+# Function that returns a value
+def return_result(a, b):
+    return a + b
+result = return_result(10, 20)
+print(result) # Output: 30
+```
+**Functions with Logic**
+You can define functions that perform a specific task, like checking if a number is even.
+
+```Python
+
+def even_check(number):
+    return number % 2 == 0
+print(even_check(20)) # True
+```
+Returning a Value from a List
+Here are two examples of functions that process a list, showing different return behaviors.
+
+Example 1: Check if any number is even
+
+```Python
+
+def even_list(num_list):
+    for num in num_list:
+        if num % 2 == 0:
+            return True # Returns True as soon as an even number is found
+    return False # Only returns False if the loop completes without finding an even number
+print(even_list([1, 5, 3])) # False
+```
+Example 2: Return all even numbers in a list
+
+```Python
+def even_list(num_list):
+    even_numbers = []
+    for num in num_list:
+        if num % 2 == 0:
+            even_numbers.append(num)
+    return even_numbers
+print(even_list([1, 9, 6, 4])) # [6, 4]
+```
 
 
 
