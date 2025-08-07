@@ -245,3 +245,24 @@ Feature	Description
 | **Types?**         | Redis (advanced), Memcached (simple)        |
 | **Use cases?**     | Product info, user sessions, leaderboards   |
 | **Fully managed?** | Yes – AWS handles setup, scaling, failover  |
+
+🧠 Common Use Cases
+Scenario A: Application using RDS + ElastiCache
+```yaml
+VPC: my-app-vpc
+ ├─ Subnet 1: App Server (EC2 or Lambda)
+ ├─ Subnet 2: RDS (MySQL/PostgreSQL)
+ └─ Subnet 3: ElastiCache (Redis/Memcached)
+```
+✅ All components in the same VPC/subnets → they can talk over internal network → fast, secure, no extra config needed
+
+✅ Recommended Setup
+Use the same VPC and preferably the same subnet group or availability zone for:
+  ElastiCache
+  RDS
+  Your application
+
+This gives you:
+  Low latency
+  Secure private connections
+  Simpler setup and maintenance
