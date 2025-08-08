@@ -266,3 +266,149 @@ This gives you:
   Low latency
   Secure private connections
   Simpler setup and maintenance
+
+
+
+## Route53
+1. What it is DNS?
+Domain Name System (DNS) is the "phonebook of the internet."
+It translates human-friendly hostnames into machine-readable IP addresses.
+```scss
+www.amazon.com  →  54.239.28.85
+```
+Without DNS, you’d have to type the IP address instead of the name.
+
+2. Why it’s important:
+Backbone of the Internet: Every web request starts with DNS resolution.
+Hierarchical Naming Structure:
+```scss
+.com (Top-Level Domain)
+     └── example.com (Second-Level Domain)
+            └── www.example.com (Subdomain)
+                   └── api.example.com (Nested Subdomain)
+```
+3. DNS Terminologies.
+   
+| Term                          | Meaning                                                               | Example                                           |
+| ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- |
+| **Domain Registrar**          | Company that lets you register domain names.                          | Amazon Route 53, GoDaddy                          |
+| **DNS Records**               | Mappings from names to IPs or other resources.                        | A, AAAA, CNAME, NS                                |
+| **Zone File**                 | The file that stores DNS records for a domain.                        | Contains all `A`, `CNAME`, etc. for `example.com` |
+| **Name Server**               | Server that answers DNS queries (Authoritative or Non-Authoritative). | ns-2048.awsdns-64.com                             |
+| **TLD (Top-Level Domain)**    | Last part of the domain name.                                         | `.com`, `.in`, `.org`                            |
+| **SLD (Second-Level Domain)** | Domain name under a TLD.                                              | `amazon.com`, `google.com`         |
+
+
+4. How DNS Works – Step-by-Step
+Let’s say you want to visit www.example.com:
+```
+Browser:
+You type the address, and the browser asks the OS, “What’s the IP for www.example.com?”
+
+Local DNS Server (Resolver):
+Usually managed by your ISP or company network. If it knows the IP from cache, it returns it immediately.
+
+Root DNS Server:
+If not cached, resolver asks the root servers (managed by ICANN).
+Root server replies: “I know where .com TLD servers are. Here’s their IP.”
+
+TLD DNS Server:
+Resolver asks the .com TLD servers (managed by IANA).
+They respond: “The nameservers for example.com are 5.6.7.8.”
+
+SLD DNS Server (Authoritative):
+Resolver queries the nameservers for example.com (e.g., Route 53).
+Route 53 replies: “www.example.com = 9.10.1.12.”
+
+Browser Connects:
+Browser connects to 9.10.1.12 and loads the website.
+```
+
+5. Route 53 Overview
+Amazon Route 53 is:
+
+Highly available & scalable
+
+Fully managed authoritative DNS
+
+Lets you update your own DNS records
+
+Can check health of your endpoints
+
+The only AWS service with 100% SLA uptime guarantee
+
+
+6. Route 53 Records
+Each DNS record defines how you route traffic for a domain.
+
+A record contains:
+
+Name: example.com or app.example.com
+
+Type: A, AAAA, CNAME, etc.
+
+Value: IP or another hostname
+
+Routing Policy: How Route 53 decides which record to use
+
+TTL: How long the resolver caches the record
+
+7. Record Types
+
+| Record Type | Purpose                                              | Example                              |
+| ----------- | ---------------------------------------------------- | ------------------------------------ |
+| **A**       | Hostname → IPv4 address                              | `www.example.com → 192.0.2.44`       |
+| **AAAA**    | Hostname → IPv6 address                              | `api.example.com → 2001:db8::1234`   |
+| **CNAME**   | Hostname → another hostname (must resolve to A/AAAA) | `blog.example.com → www.example.com` |
+| **NS**      | Nameservers for the hosted zone                      | `ns-2048.awsdns-64.com`              |
+
+💡 AWS SAA Tip:
+Route 53 also supports Alias records (AWS-specific) → Like CNAME but can be used for root domains and integrates with AWS resources like S3, CloudFront, ALB.
+
+8. Hosted Zones
+A Hosted Zone is a container for all the records for a domain.
+
+Two types:
+
+Public Hosted Zone
+
+For public-facing domains.
+
+Example: example.com → EC2 public IP.
+
+Private Hosted Zone
+
+Only resolvable within one or more VPCs.
+
+Example: db.internal → 10.0.1.5.
+
+💲 Cost: $0.50/month per hosted zone.
+
+9. TTL (Time to Live)
+TTL controls how long DNS resolvers cache your record.
+
+High TTL (e.g., 24 hrs)
+✅ Less traffic to Route 53
+❌ Slow changes propagation (old data may be served longer)
+
+Low TTL (e.g., 60 sec)
+✅ Changes propagate faster
+❌ More DNS queries (slightly higher cost)
+
+Example:
+If TTL = 300s (5 minutes) and you change the IP, it can take up to 5 minutes for everyone to see the new IP.
+
+10. Real AWS Example
+You have an EC2 instance for your app and want www.myapp.com to point to it:
+
+Register domain in Route 53.
+
+Create Public Hosted Zone for myapp.com.
+
+Add A record:
+www.myapp.com → 13.54.22.11 (EC2 Public IP), TTL 300.
+
+Test:
+```ngnix
+nslookup www.myapp.com
+```
