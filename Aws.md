@@ -37,13 +37,13 @@ App ↔ RDS Proxy ↔ RDS/Aurora DB
   - Amazon Aurora (MySQL-compatible and PostgreSQL-compatible)
 
 🛠️ How to Set Up RDS Proxy (Console)
-- Go to RDS Console → Proxies → Create proxy
-- Choose the DB engine (MySQL/PostgreSQL).
-- Select the RDS or Aurora DB instance or cluster.
-- Choose a Secrets Manager secret for DB credentials.
-- Enable IAM authentication (optional).
-- Configure VPC, subnets, and security groups.
-- Create the proxy.
+  - Go to RDS Console → Proxies → Create proxy
+  - Choose the DB engine (MySQL/PostgreSQL).
+  - Select the RDS or Aurora DB instance or cluster.
+  - Choose a Secrets Manager secret for DB credentials.
+  - Enable IAM authentication (optional).
+  - Configure VPC, subnets, and security groups.
+  - Create the proxy.
 
 📌 When NOT to Use RDS Proxy?
   - If your app has long-lived connections and doesn’t create many new ones.
@@ -53,7 +53,7 @@ App ↔ RDS Proxy ↔ RDS/Aurora DB
 **Extra:**
 
 💡 What is "Connection Pooling"?
-- Connection pooling is like having a reusable set of doors into your database, instead of building a new door every time someone wants to enter.
+  - Connection pooling is like having a reusable set of doors into your database, instead of building a new door every time someone wants to enter.
 
 🖥️ In Programming Terms:
 - Every time your app wants to talk to a database, it needs to:
@@ -130,7 +130,8 @@ const connection = mysql.createConnection({
 Amazon ElastiCache is a fully managed in-memory caching service by AWS. It helps your applications run faster by storing frequently accessed data in memory, instead of always querying a slower database.
 
 🧠 **Think of It Like This:**
-Without cache: Every time your app needs data, it asks the database. This is slow if it happens millions of times. With cache: Your app checks the cache first. If the data is there (a cache hit), it returns instantly. If not (a cache miss), it goes to the database and stores the result in the cache for next time.
+- Without cache: Every time your app needs data, it asks the database. This is slow if it happens millions of times.
+- With cache: Your app checks the cache first. If the data is there (a cache hit), it returns instantly. If not (a cache miss), it goes to the database and stores the result in the cache for next time.
 
 🔧 **ElastiCache Supports Two Engines:**
 
@@ -175,13 +176,13 @@ User → App
 Use ElastiCache (Redis):
 
 1. When a user visits a product page:
-  App checks ElastiCache: GET product:1234
+  - App checks ElastiCache: GET product:1234
 
 2. If cache hit: return fast
 
 3. If cache miss:
-  Get from database
-  Store in cache: SET product:1234 {product_data} EX 3600 (cache for 1 hour)
+  - Get from database
+  - Store in cache: SET product:1234 {product_data} EX 3600 (cache for 1 hour)
 
 📜 **Code Example (Python + Redis)**
 ```python
@@ -215,22 +216,21 @@ def get_product(product_id):
 ```
 🧪 **When Should You Use ElastiCache?**
 ✅ Great for:
-  Frequently read data (e.g., product catalogs, user sessions, leaderboards)
-  High-volume applications (gaming, social media, e-commerce)
-  Serverless apps (like AWS Lambda) that need faster responses
+  - Frequently read data (e.g., product catalogs, user sessions, leaderboards)
+  - High-volume applications (gaming, social media, e-commerce)
+  - Serverless apps (like AWS Lambda) that need faster responses
 
 🚫 Not ideal for:
-
-Long-term data storage
-Highly sensitive data that shouldn’t be cached
-Cases where your data changes constantly every second
+- Long-term data storage
+- Highly sensitive data that shouldn’t be cached
+- Cases where your data changes constantly every second
 
 🔐 Security & Access
-ElastiCache runs inside your VPC
-You control access using security groups
-Supports encryption, authentication, and IAM policies
+- ElastiCache runs inside your VPC
+- You control access using security groups
+- Supports encryption, authentication, and IAM policies
 
-🎯 Summary
+🎯 **Summary**
 Feature	Description
 | Feature            | Description                                 |
 | ------------------ | ------------------------------------------- |
@@ -240,7 +240,7 @@ Feature	Description
 | **Use cases?**     | Product info, user sessions, leaderboards   |
 | **Fully managed?** | Yes – AWS handles setup, scaling, failover  |
 
-🧠 Common Use Cases
+🧠 **Common Use Cases**
 Scenario A: Application using RDS + ElastiCache
 ```yaml
 VPC: my-app-vpc
@@ -251,37 +251,37 @@ VPC: my-app-vpc
 ✅ All components in the same VPC/subnets → they can talk over internal network → fast, secure, no extra config needed
 
 ✅ Recommended Setup
-Use the same VPC and preferably the same subnet group or availability zone for:
-  ElastiCache
-  RDS
-  Your application
+   - Use the same VPC and preferably the same subnet group or availability zone for:
+   - ElastiCache
+   - RDS
+   - Your application
 
-This gives you:
-  Low latency
-  Secure private connections
-  Simpler setup and maintenance
+✅ This gives you:
+  - Low latency
+  - Secure private connections
+  - Simpler setup and maintenance
 
 
 
 ## Route53
-1. What it is DNS?
-Domain Name System (DNS) is the "phonebook of the internet."
-It translates human-friendly hostnames into machine-readable IP addresses.
+1. **What it is DNS?**
+- Domain Name System (DNS) is the "phonebook of the internet."
+- It translates human-friendly hostnames into machine-readable IP addresses.
 ```scss
 www.amazon.com  →  54.239.28.85
 ```
 Without DNS, you’d have to type the IP address instead of the name.
 
-2. Why it’s important:
-Backbone of the Internet: Every web request starts with DNS resolution.
-Hierarchical Naming Structure:
+2. **Why it’s important:**
+- Backbone of the Internet: Every web request starts with DNS resolution.
+- Hierarchical Naming Structure:
 ```scss
 .com (Top-Level Domain)
      └── example.com (Second-Level Domain)
             └── www.example.com (Subdomain)
                    └── api.example.com (Nested Subdomain)
 ```
-3. DNS Terminologies.
+3. **DNS Terminologies.**
    
 | Term                          | Meaning                                                               | Example                                           |
 | ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------- |
@@ -293,8 +293,8 @@ Hierarchical Naming Structure:
 | **SLD (Second-Level Domain)** | Domain name under a TLD.                                              | `amazon.com`, `google.com`         |
 
 
-4. How DNS Works – Step-by-Step
-Let’s say you want to visit www.example.com:
+4. **How DNS Works – Step-by-Step**
+- Let’s say you want to visit www.example.com:
 ```
 Browser:
 You type the address, and the browser asks the OS, “What’s the IP for www.example.com?”
@@ -318,36 +318,24 @@ Browser Connects:
 Browser connects to 9.10.1.12 and loads the website.
 ```
 
-5. Route 53 Overview
-Amazon Route 53 is:
+5. **Route 53 Overview**
+- Amazon Route 53 is:
+-- Highly available & scalable
+-- Fully managed authoritative DNS
+-- Lets you update your own DNS records
+-- Can check health of your endpoints
+-- The only AWS service with 100% SLA uptime guarantee
 
-Highly available & scalable
-
-Fully managed authoritative DNS
-
-Lets you update your own DNS records
-
-Can check health of your endpoints
-
-The only AWS service with 100% SLA uptime guarantee
-
-
-6. Route 53 Records
-Each DNS record defines how you route traffic for a domain.
-
+6. **Route 53 Records**
+- Each DNS record defines how you route traffic for a domain.
 A record contains:
+-- Name: example.com or app.example.com
+-- Type: A, AAAA, CNAME, etc.
+-- Value: IP or another hostname
+-- Routing Policy: How Route 53 decides which record to use
+-- TTL: How long the resolver caches the record
 
-Name: example.com or app.example.com
-
-Type: A, AAAA, CNAME, etc.
-
-Value: IP or another hostname
-
-Routing Policy: How Route 53 decides which record to use
-
-TTL: How long the resolver caches the record
-
-7. Record Types
+7. **Record Types**
 
 | Record Type | Purpose                                              | Example                              |
 | ----------- | ---------------------------------------------------- | ------------------------------------ |
@@ -356,53 +344,41 @@ TTL: How long the resolver caches the record
 | **CNAME**   | Hostname → another hostname (must resolve to A/AAAA) | `blog.example.com → www.example.com` |
 | **NS**      | Nameservers for the hosted zone                      | `ns-2048.awsdns-64.com`              |
 
-💡 AWS SAA Tip:
-Route 53 also supports Alias records (AWS-specific) → Like CNAME but can be used for root domains and integrates with AWS resources like S3, CloudFront, ALB.
+💡 **AWS SAA Tip:C
+ - Route 53 also supports Alias records (AWS-specific) → Like CNAME but can be used for root domains and integrates with AWS resources like S3, CloudFront, ALB.
 
-8. Hosted Zones
-A Hosted Zone is a container for all the records for a domain.
+8. **Hosted Zones**
+- A Hosted Zone is a container for all the records for a domain.
 
 Two types:
 
-Public Hosted Zone
-
-For public-facing domains.
-
-Example: example.com → EC2 public IP.
-
-Private Hosted Zone
-
-Only resolvable within one or more VPCs.
-
-Example: db.internal → 10.0.1.5.
-
+- Public Hosted Zone
+ -- For public-facing domains.
+ -- Example: example.com → EC2 public IP.
+- Private Hosted Zone
+ -- Only resolvable within one or more VPCs.
+ -- Example: db.internal → 10.0.1.5.
 💲 Cost: $0.50/month per hosted zone.
 
-9. TTL (Time to Live)
-TTL controls how long DNS resolvers cache your record.
-
-High TTL (e.g., 24 hrs)
+9. **TTL (Time to Live)**
+- TTL controls how long DNS resolvers cache your record.
+- High TTL (e.g., 24 hrs)
 ✅ Less traffic to Route 53
 ❌ Slow changes propagation (old data may be served longer)
-
-Low TTL (e.g., 60 sec)
+- Low TTL (e.g., 60 sec)
 ✅ Changes propagate faster
 ❌ More DNS queries (slightly higher cost)
 
-Example:
-If TTL = 300s (5 minutes) and you change the IP, it can take up to 5 minutes for everyone to see the new IP.
+**Example:**
+- If TTL = 300s (5 minutes) and you change the IP, it can take up to 5 minutes for everyone to see the new IP.
 
-10. Real AWS Example
-You have an EC2 instance for your app and want www.myapp.com to point to it:
-
-Register domain in Route 53.
-
-Create Public Hosted Zone for myapp.com.
-
-Add A record:
-www.myapp.com → 13.54.22.11 (EC2 Public IP), TTL 300.
-
-Test:
+10. **Real AWS Example**
+- You have an EC2 instance for your app and want www.myapp.com to point to it:
+-- Register domain in Route 53.
+-- Create Public Hosted Zone for myapp.com.
+-- Add A record:
+--- www.myapp.com → 13.54.22.11 (EC2 Public IP), TTL 300.
+- Test:
 ```ngnix
 nslookup www.myapp.com
 ```
