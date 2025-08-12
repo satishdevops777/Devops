@@ -786,7 +786,37 @@ def even_list(num_list):
 print(even_list([1, 9, 6, 4])) # [6, 4]
 ```
 
+## 📘 12. What are *args and **kwargs?
 
+- **args** → lets you pass any number of positional arguments to a function (stored as a tuple).
+- **kwargs** → lets you pass any number of keyword arguments to a function (stored as a dictionary).
+
+Think of them as a way to make functions flexible without hardcoding the number of inputs.
+- Example: args
+```python
+def install_packages(*args):
+    for pkg in args:
+        print(f"Installing {pkg}...")
+
+install_packages("nginx", "docker", "git")
+```
+- Example: kwargs
+```python
+def deploy_service(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key} => {value}")
+
+deploy_service(app="web", version="1.0.2", replicas=3)
+```
+
+- *args and **kwargs together
+```python
+def configure_server(*args, **kwargs):
+    print("Packages to install:", args)
+    print("Configuration settings:", kwargs)
+
+configure_server("nginx", "docker", user="admin", port=8080)
+```
 # Displaying Informtion
 a = 100
 print(a)
