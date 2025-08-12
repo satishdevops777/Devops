@@ -1043,6 +1043,6 @@ list_buckets()
 - We can use error handling to attempt to plan for possible errors
 - We can use error handling to let the script continue with other code, even if there is an error
 - We use three keywords for this:
--- try: This is the block of code to be attempted (May lead to an error)
--- except: Block of code will execute in case there is an error in try block
--- finally: A final block of code to be executed, regardless of an error
+  --try: This is the block of code to be attempted (May lead to an error)
+  --except: Block of code will execute in case there is an error in try block
+  --finally: A final block of code to be executed, regardless of an error
