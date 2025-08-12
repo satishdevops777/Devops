@@ -1043,6 +1043,32 @@ list_buckets()
 - We can use error handling to attempt to plan for possible errors
 - We can use error handling to let the script continue with other code, even if there is an error
 - We use three keywords for this:
-  --try: This is the block of code to be attempted (May lead to an error)
-  --except: Block of code will execute in case there is an error in try block
-  --finally: A final block of code to be executed, regardless of an error
+-- try: This is the block of code to be attempted (May lead to an error)
+-- except: Block of code will execute in case there is an error in try block
+-- finally: A final block of code to be executed, regardless of an error
+
+```python
+def add():
+    try:
+        n1 = int(input("Please enter a number: "))
+        n2 = int(input("Please enter a number: "))
+        result = n1 + n2
+    except ValueError:
+        print("Invalid input! Please enter numeric values.")
+    else:
+        print("Addition went well")
+        print("Result:", result)
+
+add()
+```
+```python
+try:
+    f = open ('testfile','r')
+    f.write("Write a test file")
+except TypeError:
+    print("There was a type error!")
+except OSError:
+    print('Hey you have an OS Error')
+finally:
+    print("I always run")
+```
