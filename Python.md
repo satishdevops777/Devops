@@ -817,18 +817,22 @@ def configure_server(*args, **kwargs):
 
 configure_server("nginx", "docker", user="admin", port=8080)
 ```
-# Displaying Informtion
+## 📘 13. Displaying Informtion
+
+```python
 a = 100
 print(a)
-
-# Accepting User Input
-# Input function always return a str type we can convert if we want to
+```
+### Accepting User Input
+- Input function always return a str type we can convert if we want to
+```python
 result = input("Plese enter a value: ")
 print(result)
 type(result)
+```
 
-
-# Validating User Input
+### Validating User Input
+```python
 def user_choice():
     choice = 'Wrong'
     while choice.isdigit() == False:
@@ -837,83 +841,199 @@ def user_choice():
             print("Sorry that is not a digit")
     return int(choice)
 user_choice()
+```
+## 📘 14. Modulus and packages
+**1. What is a Module in Python?**
+- A module is simply a Python file (.py) that contains code (functions, classes, variables) you can reuse.
 
-# Validating User Input
-def user_choice():
-    # Variables
-    choice = 'Wrong'
-    acceptable_range = range(0,10)
-    within_range = False
-  
-  # Two Conditions to check
-  # Digit or Within_range==False
-    while choice.isdigit() == False or within_range == False:
-        choice = input("Please enter a number (0-10): ")
-        
-        # Digit Check
-        if choice.isdigit() == False:
-            print("Sorry that is not a digit")
-        # Range Check
-        if choice.isdigit() == True:
-            if int(choice) in acceptable_range:
-                within_range = True
-            else:
-                print("Sorry, You are out of acceptable range (0-10)")
-                within_range = False
-    return int(choice)
-user_choice()
+Think:
+- A single .py file = 1 module.
 
-game_list = [0,1,2]
+Example — Creating and Importing a Module
+📁 server_utils.py
+```python
+# server_utils.py
+def start_server(name):
+    print(f"Starting server: {name}")
 
-def display_game(game_list):
-    print("Here is the current list: ")
-    print(game_list)
-display_game(game_list)
+def stop_server(name):
+    print(f"Stopping server: {name}")
+```
+📁 main.py
+```python
+# main.py
+import server_utils
 
-def position_choice():
-    choice = 'wrong'
-    while choice not in ['0','1','2']:
-        choice  = input("Pick a position (0,1,2): ")
-        if choice not in ['0','1','2']:
-            print("Sorry, Invalid Choice")
-        else:
-            print(choice)
-    return int(choice)
-position_choice()
+server_utils.start_server("nginx")
+server_utils.stop_server("nginx")
+```
+Output:
+```yaml
+Starting server: nginx
+Stopping server: nginx
+```
 
-def replacement_choice(game_list,position):  
-    user_placement = input("Type a string to place at position: ")
-    game_list[position] = user_placement
-    print(game_list)
-    return game_list
-replacement_choice(game_list,1)
+**2. What is a Package in Python?**
+- A package is a collection of modules inside a folder that contains a special file __init__.py.
 
-def gameon_choice():
-    choice = 'wrong'
-    while choice not in ['Y','N']:
-        choice  = input("Pick a position (Y or N): ")
-        if choice not in ['Y','N']:
-            print("Sorry, I dont uderstand, Please choose Y or N")
-    if choice == "Y":
-        return True
-    else:
-        return False
-    return int(choice)
-gameon_choice()
+Think:
+- Folder with multiple .py files (modules) + __init__.py = package.
+Example — Creating and Using a Package
+📁 Folder Structure:
+```markdown
+devops_tools/
+    __init__.py
+    aws_utils.py
+    k8s_utils.py
+main.py
+```
 
-game_on = True
-game_list = [0,1,2]
+📁 aws_utils.py
 
-while game_on:
-    display_game(game_list)
-    position = position_choice()
-    game_list = replacement_choice(game_list,position)
-    display_game(game_list)
-    game_on = gameon_choice()
+```python
+def list_s3_buckets():
+    print("Listing S3 buckets...")
 
+def create_s3_bucket(name):
+    print(f"Creating S3 bucket: {name}")
+```
+📁 k8s_utils.py
+```python
+def list_pods():
+    print("Listing Kubernetes pods...")
 
+def deploy_pod(name):
+    print(f"Deploying pod: {name}")
+```
 
+📁 main.py
+```python
+from devops_tools import aws_utils, k8s_utils
 
+aws_utils.list_s3_buckets()
+k8s_utils.list_pods()
+```
+Output:
 
+```nginx
+Listing S3 buckets...
+Listing Kubernetes pods...
+```
+**3. Key Differences**
+| **Module**                             | **Package**                                             |
+| -------------------------------------- | ------------------------------------------------------- |
+| Single `.py` file                      | Folder with multiple `.py` files                        |
+| Used for smaller, related functions    | Used for organizing large projects                      |
+| Imported directly (`import file_name`) | Imported via folder path (`from package import module`) |
 
+**4. Why DevOps Engineers Care**
+- Modules → Organize automation scripts for different tasks (EC2, S3, CI/CD).
+- Packages → Create reusable DevOps toolkits for teams.
+- Keeps large automation projects structured.
 
+**5. Real DevOps Example**
+You might have:
+```markdown
+infra_automation/
+    __init__.py
+    aws.py
+    docker.py
+    kubernetes.py
+```
+- ```aws.py``` → Functions for EC2, S3
+- ```docker.py``` → Functions for building & pushing images
+- ```kubernetes.py``` → Functions for deployments & services
+You import only what you need:
+```python
+from infra_automation import aws, docker
+aws.create_ec2_instance("t2.micro")
+docker.build_image("myapp")
+```
+
+## 📘 15. __name__ == "__main__"
+
+**1. What does __name__ do?**
+- Every Python file has a built-in variable called __name__.
+- If you run a Python file directly, Python sets __name__ = "__main__".
+- If you import that file into another script, __name__ will be set to the module’s name (filename without .py).
+
+**2. Why use if __name__ == "__main__":?**
+This lets you write code that:
+- Runs only when the file is executed directly.
+- Does not run when the file is imported as a module.
+
+**3. Example — Without __main__**
+📁 server.py
+```python
+print("Starting server...")
+
+def start():
+    print("Server is running.")
+```
+📁 main.py
+```python
+import server
+print("Doing other tasks...")
+```
+Output:
+```nginx
+Starting server...       # <-- Runs even though we just imported
+Doing other tasks...
+```
+❌ This is bad because importing the file starts the server automatically.
+
+**4. Example — With if __name__ == "__main__":**
+📁 server.py
+```python
+def start():
+    print("Server is running.")
+
+if __name__ == "__main__":
+    print("Starting server...")
+    start()
+```
+📁 main.py
+```python
+import server
+print("Doing other tasks...")
+```
+***Case 1 — Run python server.py***
+```nginx
+Starting server...
+Server is running.
+```
+***Case 2 — Run python main.py***
+```nginx
+Doing other tasks...
+```
+✅ Now the server doesn’t auto-run when imported.
+
+**5. Why DevOps Engineers Use This**
+- To make scripts that can be imported as a library or run as a standalone tool.
+- Example: You might have aws_utils.py with functions, but only run them if the file is executed directly.
+```python
+# aws_utils.py
+import boto3
+
+def list_buckets():
+    s3 = boto3.client('s3')
+    for bucket in s3.list_buckets()['Buckets']:
+        print(bucket['Name'])
+
+if __name__ == "__main__":
+    print("Listing buckets from CLI...")
+    list_buckets()
+```
+You can run:
+```bash
+python aws_utils.py
+```
+
+- Lists buckets immediately.
+- Or import it into another script:
+
+```python
+from aws_utils import list_buckets
+list_buckets()
+```
+- No unwanted extra output.
