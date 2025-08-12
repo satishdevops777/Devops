@@ -1037,3 +1037,12 @@ from aws_utils import list_buckets
 list_buckets()
 ```
 - No unwanted extra output.
+
+## 📘 16. Errors and exception handling
+- Errors are bound to happen in code.
+- We can use error handling to attempt to plan for possible errors
+- We can use error handling to let the script continue with other code, even if there is an error
+- We use three keywords for this:
+  -- try: This is the block of code to be attempted (May lead to an error)
+  -- except: Block of code will execute in case there is an error in try block
+  -- finally: A final block of code to be executed, regardless of an error
