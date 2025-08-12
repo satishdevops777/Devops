@@ -787,7 +787,15 @@ print(even_list([1, 9, 6, 4])) # [6, 4]
 ```
 
 
+# Displaying Informtion
+a = 100
+print(a)
 
+# Accepting User Input
+# Input function always return a str type we can convert if we want to
+result = input("Plese enter a value: ")
+print(result)
+type(result)
 
 
 
