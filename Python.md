@@ -798,6 +798,40 @@ print(result)
 type(result)
 
 
+# Validating User Input
+def user_choice():
+    choice = 'Wrong'
+    while choice.isdigit() == False:
+        choice = input("Please enter a number (0-10): ")
+        if choice.isdigit() == False:
+            print("Sorry that is not a digit")
+    return int(choice)
+user_choice()
+
+# Validating User Input
+def user_choice():
+    # Variables
+    choice = 'Wrong'
+    acceptable_range = range(0,10)
+    within_range = False
+  
+  # Two Conditions to check
+  # Digit or Within_range==False
+    while choice.isdigit() == False or within_range == False:
+        choice = input("Please enter a number (0-10): ")
+        
+        # Digit Check
+        if choice.isdigit() == False:
+            print("Sorry that is not a digit")
+        # Range Check
+        if choice.isdigit() == True:
+            if int(choice) in acceptable_range:
+                within_range = True
+            else:
+                print("Sorry, You are out of acceptable range (0-10)")
+                within_range = False
+    return int(choice)
+user_choice()
 
 
 
