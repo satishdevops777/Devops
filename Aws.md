@@ -82,6 +82,12 @@
 - AWS Shield & WAF → DDoS and security protections at the edge.
 - Global Accelerator → Directs traffic through AWS global network for reduced latency.
 
+👉 In short:
+- Region = where your workloads run.
+- Edge Location (PoP) = where your content is delivered from, close to the user.
+
+AWS Identity and Access Management (AWS IAM)
+
 ## RDS Proxy
 
 Amazon RDS Proxy is a fully managed database proxy service for Amazon RDS and Amazon Aurora. It helps improve application scalability, resiliency, and security by sitting between your application and your RDS/Aurora databases. RDS Proxy is never publically accessible(Must be accessed from VPC)
