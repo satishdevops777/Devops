@@ -282,7 +282,9 @@ aws sts get-session-token \
 ```
 - Returns temporary credentials for secure use.
 
-✅ In short: MFA = extra security layer for AWS accounts. Enable it for root + IAM users, enforce it with policies, and use it with CLI/roles when needed.
+✅ In short: 
+- MFA = extra security layer for AWS accounts. 
+- Enable it for root + IAM users, enforce it with policies, and use it with CLI/roles when needed.
 
 
 ## RDS Proxy
