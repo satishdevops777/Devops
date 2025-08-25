@@ -122,6 +122,169 @@
 🔐 IAM Policy Structure
 - An IAM Policy is a JSON document that defines permissions. It has a fixed structure:
 
+**1. Top-Level Elements**
+- Version
+  - Defines the policy language version.
+  - Always use "2012-10-17" (latest & recommended).
+
+- Id (optional)
+  - Identifier for the policy.
+  - Useful for tracking/logging.
+
+- Statement (required)
+  - One or more permission rules.
+  - Each statement defines a single permission or restriction.
+
+**2. Inside a Statement**
+- Each Statement block has these elements:
+  - Sid (optional) → Statement ID (label for readability).
+  - Effect → "Allow" or "Deny".
+  - Principal → The who the policy applies to (only in resource-based policies, e.g., S3 bucket policy).
+  - Action → The what actions are allowed/denied (e.g., s3:PutObject, ec2:StartInstances).
+  - Resource → The where (which resources). Defined using ARNs.
+  - Condition (optional) → Extra restrictions (e.g., only allow from specific IPs, time of day, MFA required).
+
+```json
+
+{
+  "Version": "2012-10-17",
+  "Id": "S3CombinedPolicy",
+  "Statement": [
+    {
+      "Sid": "ListAllBuckets",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadObjectsFromBucket",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-example-bucket/*"
+    },
+    {
+      "Sid": "AllowAccountUpload",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::111122223333:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::my-example-bucket/*"
+    },
+    {
+      "Sid": "IPRestrict",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "arn:aws:s3:::secure-bucket/*",
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "203.0.113.0/24"
+        }
+      }
+    }
+  ]
+}
+```
+**📝 Description of This Policy**
+
+- ListAllBuckets
+  - Allows the IAM user/group/role to list all S3 buckets in the account.
+
+- ReadObjectsFromBucket
+  - Grants read access (s3:GetObject) to objects in the bucket my-example-bucket.
+
+- AllowAccountUpload
+  - Lets another AWS account (111122223333) upload (s3:PutObject) to your bucket my-example-bucket.
+  - Uses Principal because it’s a resource-based statement.
+
+- IPRestrict
+  - Allows full S3 actions (s3:*) on the bucket secure-bucket but only if the request comes from IP range 203.0.113.0/24.
+  - Uses Condition to enforce network-based restriction.
+
+**⚠️ Note:**
+- In real AWS, you don’t normally mix identity-based and resource-based policies into one JSON, since they’re attached to different places (IAM user vs S3 bucket).
+- But for learning/demo purposes, this combined policy shows all main components (Allow/Deny, Principal, Resource, Condition).
+
+**IAM – Password Policy**
+- Strong passwords = higher security for your account
+  - In AWS, you can setup a password policy:
+  - Set a minimum password length
+  - Require specific character types:
+    - including uppercase letters
+    - lowercase letters
+    - numbers
+    - non-alphanumeric characters
+  - Allow all IAM users to change their own passwords
+  - Require users to change their password after some time (password expiration)
+  - Prevent password re-use
+
+**1. What is MFA?**
+- MFA = Multi-Factor Authentication → an extra layer of security for signing in.
+- A user must provide two things:
+  - Something you know → password.
+  - Something you have → MFA device (code/token).
+- This makes it much harder for attackers to access your account, even if the password is stolen.
+
+**2. Where is MFA Used in AWS?**
+- Root account → must always enable MFA (best practice).
+- IAM users → can (and should) enable MFA for extra security.
+- Roles (via MFA-Required policies) → you can require MFA before assuming a sensitive role.
+
+**3. MFA Devices Supported**
+
+- AWS supports different MFA devices:
+  - Virtual MFA Device (most common)
+    - Uses an app on a phone (Google Authenticator, Authy, Microsoft Authenticator, AWS Virtual MFA).
+    - Generates a 6-digit code every 30 seconds.
+    - Free and easy.
+
+  - Hardware MFA Device
+    - A physical device (key fob) from vendors like Gemalto.
+    - Used by enterprises with strict compliance needs.
+
+  - U2F Security Key (FIDO2)
+    - USB/NFC hardware key (like YubiKey).
+    - Plug it in or tap it to authenticate.
+
+  - SMS Text Message MFA (legacy, less secure)
+    - AWS used to support SMS-based MFA, but it’s being phased out for higher security options.
+
+**4. IAM Policy with MFA Requirement**
+- You can enforce MFA for certain API calls. Example: require MFA to delete objects in S3:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowAllS3ActionsWithMFA",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "*",
+      "Condition": {
+        "Bool": {
+          "aws:MultiFactorAuthPresent": "true"
+        }
+      }
+    }
+  ]
+}
+```
+- If MFA is required to assume a role:
+```json
+aws sts get-session-token \
+  --serial-number arn:aws:iam::123456789012:mfa/johndoe \
+  --token-code 123456
+
+
+# --serial-number → ARN of your MFA device.
+
+# --token-code → 6-digit code from the MFA app/device.
+```
+- Returns temporary credentials for secure use.
+
+✅ In short: MFA = extra security layer for AWS accounts. Enable it for root + IAM users, enforce it with policies, and use it with CLI/roles when needed.
+
+
 ## RDS Proxy
 
 Amazon RDS Proxy is a fully managed database proxy service for Amazon RDS and Amazon Aurora. It helps improve application scalability, resiliency, and security by sitting between your application and your RDS/Aurora databases. RDS Proxy is never publically accessible(Must be accessed from VPC)
