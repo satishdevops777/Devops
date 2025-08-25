@@ -1,3 +1,52 @@
+# Amazon Web Services (AWS)
+
+AWS Regions 
+- AWS has Regions all around the world.
+- Names can be us-east-1, eu-west-3…
+- A region is a cluster of data centers
+- Most AWS services are region-scoped
+
+✅ Factors to Consider When Choosing an AWS Region
+1. Latency & Proximity to Users
+- Pick a region closest to your end users or business operations.
+- Lower network latency → better performance (important for customer-facing apps).
+- Example: If most users are in India → choose ap-south-1 (Mumbai).
+
+2. Compliance & Data Residency
+- Some industries (banking, healthcare, government) require data to remain in a specific country.
+- Example:
+  - EU GDPR compliance → use eu-central-1 (Frankfurt) or eu-west-1 (Ireland).
+  - Indian data residency laws → Mumbai Region.
+
+3. Service Availability
+- Not all AWS services are available in every region.
+- Example:
+  - New services (like Bedrock, Q, or Local Zones) usually launch first in us-east-1 (N. Virginia).
+  - If you need Outposts or Wavelength Zones, check AWS Region availability.
+👉 Always check the AWS Regional Services List before finalizing.
+
+4. Cost
+- Prices differ by region.
+- Example:
+  - Running an EC2 instance in us-east-1 is usually cheaper than in ap-south-1.
+  - If latency/compliance isn’t strict → you can optimize cost by picking a cheaper region.
+
+5. Disaster Recovery & Multi-Region Strategy
+- For high availability:
+  - Choose a primary region close to your users.
+  - Use a secondary region for DR (Disaster Recovery).
+- Example:
+  - Primary: Mumbai
+  - DR: Singapore
+
+6. Ecosystem & Partner Support
+- Some AWS Regions have better connectivity to Direct Connect locations, CloudFront POPs, and enterprise partners.
+- Example: If your corporate data center is in Singapore, hosting in ap-southeast-1 reduces data transfer latency.
+
+7. Legal & Tax Implications
+- Some regions have different billing structures or legal frameworks.
+- Enterprises may choose a region based on legal risk minimization.
+
 ## RDS Proxy
 
 Amazon RDS Proxy is a fully managed database proxy service for Amazon RDS and Amazon Aurora. It helps improve application scalability, resiliency, and security by sitting between your application and your RDS/Aurora databases. RDS Proxy is never publically accessible(Must be accessed from VPC)
