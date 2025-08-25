@@ -86,7 +86,41 @@
 - Region = where your workloads run.
 - Edge Location (PoP) = where your content is delivered from, close to the user.
 
-AWS Identity and Access Management (AWS IAM)
+## 📘 1. AWS Identity and Access Management (AWS IAM)
+**IAM: Users & Groups**
+- IAM = Identity and Access Management, Global service
+- Root account created by default, shouldn’t be used or shared
+- Users are people within your organization, and can be grouped
+- Groups only contain users, not other groups
+- Users don’t have to belong to a group, and user can belong to multiple groups
+
+**IAM: Permissions**
+- Permissions define what actions are allowed or denied for a user, group, or role.
+- Permissions in IAM are assigned using policies.
+- A policy is a JSON document that specifies:
+  - Effect → Allow / Deny
+  - Action → Which API calls are allowed (e.g., s3:PutObject, ec2:StartInstances)
+  - Resource → Which AWS resource the action applies to (e.g., a specific bucket or instance)
+
+**Types of Policies**
+
+- AWS Managed Policies 
+  - Predefined by AWS.
+  - Example: AmazonS3ReadOnlyAccess, AdministratorAccess.
+  - Good for quick setup.
+
+- Customer Managed Policies
+  - Created and managed by you.
+  - More flexible, reusable.
+  - Example: Create a policy to allow EC2 start/stop only.
+
+- Inline Policies
+  - Attached directly to a single user, group, or role.
+  - Not reusable.
+  - Best avoided in most cases.
+
+🔐 IAM Policy Structure
+- An IAM Policy is a JSON document that defines permissions. It has a fixed structure:
 
 ## RDS Proxy
 
