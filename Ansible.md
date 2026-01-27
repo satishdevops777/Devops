@@ -8,7 +8,7 @@ Ansible is an open-source automation tool that helps in configuration management
 
 * **Agentless**: Uses SSH or WinRM for communication, no agents needed on managed nodes.
 * **Simple Syntax**: Employs YAML for human-readable playbooks.
-* **Idempotent**: Ensures tasks only make changes when necessary, preventing unintended side effects.
+* **Idempotent**: Ensures tasks only make changes when necessary, preventing unintended side effects. You can run the same Ansible playbook multiple times, and the system will end up in the same desired state every time — without unnecessary changes.
 * **Powerful & Scalable**: Suitable for everything from small personal setups to large enterprise deployments.
 
 ---
@@ -623,6 +623,8 @@ You can control task behavior on failure.
     state: stopped
   ignore_errors: yes
 ```
+🔹 Even if fake-service doesn’t exist → play continues
+
 **Fail only if custom condition is true**
 ```YAML
 - name: Conditional failure
@@ -634,6 +636,7 @@ You can control task behavior on failure.
 ```YAML
 any_errors_fatal: true
 ```
+### ⛔ Stop play on all hosts if any host fails
 ## 22. Ansible Vault
 Encrypt secrets like API keys, passwords, and certificates.
 
