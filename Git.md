@@ -14,7 +14,7 @@
 - **`git init`**: Initializes a new Git repository.
 - **`git clone <repository-url>`**: Clones an existing repository into a new directory.
 - **`git add <file>`**: Stages changes in the specified file for the next commit.
-- **`git add .`**: Stages all changes in the current directory.
+- **`git add .`**: Stages all changes in the current directory. Reviewing the changes.
 - **`git commit -m "message"`**: Commits the staged changes with a descriptive message.
 - **`git status`**: Shows the status of changes in the working directory and staging area.
 - **`git log`**: Displays the commit history.
@@ -28,7 +28,31 @@
 - **`git checkout <branch-name>`**: Switches to the specified branch.
 - **`git checkout -b <branch-name>`**: Creates and switches to a new branch.
 - **`git merge <branch-name>`**: Merges the specified branch into the current branch.
+  - 1️⃣ Fast-forward merge
+    - Happens when main has no new commits after branch creation.
+      ```
+      git checkout main
+      git merge feature/login
+      ```
+      - No merge commit
+      - Pointer just moves forward
+        ```
+        A──B──C──D
+        ```
+- ✔️ Clean history
+- ❌ Loses info that a branch existed
 
+  - 2️⃣ Three-way merge (normal merge)
+    - Happens when both branches have new commits.
+    - Git creates a merge commit.
+    ```
+        A──B───M
+       └──C──D
+    ```
+- ✔️ Preserves branch history
+- ✔️ Preferred in teams
+
+- git merge integrates changes from one branch into another. It can result in a fast-forward merge or a three-way merge. If the same code is changed in both branches, Git raises a merge conflict which must be resolved manually.
 ---
 
 ## Remote Repositories
