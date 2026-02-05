@@ -12,20 +12,68 @@ Terraform evaluates variables in the following order:
 4. **\*.auto.tfvars** or **\*.auto.tfvars.json**
 5. **Any -var or -var-file options** on the CLI
 
-<img width="391" height="685" alt="image" src="https://github.com/user-attachments/assets/0aa10bb4-18c1-4448-a8f6-00a5feb22035" />
-
+- The order is CLI -var, then -var-file, environment variables, terraform.tfvars, *.auto.tfvars, and finally default values in variable definitions.”
+  
+  ```
+  terraform apply -var="instance_type=t3.large"
+  terraform apply -var-file="prod.tfvars"
+  export TF_VAR_instance_type="t3.medium"
+  ```
 ---
 
 ## 2. Data Types
 Supported data types in Terraform:
 - **string**: A sequence of Unicode characters (e.g., `"hello"`).
+  ```
+  variable "env" {
+  type = string
+  }
+  ```
+  
 - **number**: A numeric value.
+  ```
+  variable "instance_count" {
+  type = number
+  }
+  ```
 - **bool**: True or false.
-- **list**: A sequence of values (e.g., `["a", 15, true]`).
+  ```
+  variable "enable_monitoring" {
+  type = bool
+  }
+  ```
+- **list**: Ordered collection of same-type values. (e.g., `["a", 15, true]`).
+  ```
+  variable "subnet_ids" {
+  type = list(string)
+  }
+
+  ["subnet-1", "subnet-2", "subnet-3"]
+  ```
 - **set**: A collection of unique values with no secondary identifiers.
+  ```
+  variable "availability_zones" {
+  type = set(string)
+  }
+
+  ["ap-south-1a", "ap-south-1b"]
+  ```
 - **map**: A group of values identified by named labels (e.g., `{name="mabel", age=52}`).
 - **null**: Represents absence or omission.
 
+```
+variable "eks_config" {
+  type = object({
+    cluster_name = string
+    version      = string
+    node_groups  = map(object({
+      instance_type = string
+      min_size      = number
+      max_size      = number
+    }))
+  })
+}
+```
 ---
 
 ## 3. Count and `count.index`
