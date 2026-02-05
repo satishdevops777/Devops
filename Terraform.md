@@ -12,6 +12,8 @@ Terraform evaluates variables in the following order:
 4. **\*.auto.tfvars** or **\*.auto.tfvars.json**
 5. **Any -var or -var-file options** on the CLI
 
+<img width="391" height="685" alt="image" src="https://github.com/user-attachments/assets/0aa10bb4-18c1-4448-a8f6-00a5feb22035" />
+
 ---
 
 ## 2. Data Types
