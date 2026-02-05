@@ -73,9 +73,54 @@ spec:
             - containerPort: 80
 ```
 
-## 5. Deployments
+| Feature               | ReplicaSet | Deployment   |
+| --------------------- | ---------- | ------------ |
+| Pod scaling           | ✅          | ✅            |
+| Self-healing          | ✅          | ✅            |
+| Rolling updates       | ❌          | ✅            |
+| Rollback              | ❌          | ✅            |
+| Version history       | ❌          | ✅            |
+| Used directly in prod | ❌ (rare)   | ✅ (standard) |
 
-A Deployment provides declarative updates for Pods and ReplicaSets.
+
+| Pod               | ReplicaSet           |
+| ----------------- | -------------------- |
+| Single instance   | Manages many Pods    |
+| No self-healing   | Self-healing         |
+| Manual recreation | Automatic recreation |
+| Not scalable      | Scalable             |
+
+- Deployments create and manage ReplicaSets for you.
+- Old ReplicaSet stays (for rollback) but scaled to 0.
+- ❌ Pods getting deleted unexpectedly
+Cause:
+- Another ReplicaSet or Deployment using same labels
+  ```
+  kubectl get rs --show-labels
+  ```
+- 📌 Labels must be unique per workload
+
+- “A ReplicaSet ensures a fixed number of identical Pods are always running. It provides self-healing and scaling but does not support rolling updates. In production, ReplicaSets are typically managed by Deployments rather than used directly.”
+
+## 5. Deployments
+- A Deployment is a higher-level controller that:
+  - Manages ReplicaSets
+  - Ensures the desired number of Pods are running
+  - Handles rolling updates, rollbacks, and scaling
+
+👉 In real production, you deploy Deployments, not Pods or ReplicaSets directly.
+
+### Why Deployments exist
+
+- Without Deployments:
+- Updates cause downtime ❌
+- No rollback ❌
+- Manual Pod recreation ❌
+### Deployments give you:
+- Zero-downtime updates ✅
+- Version history ✅
+- Easy rollback ✅
+- Declarative state management ✅
 
 Example: Deployment YAML
 
@@ -98,6 +143,56 @@ spec:
         - name: nginx
           image: nginx
 ```
+## Deployment Strategies
+
+### 1️⃣ RollingUpdate (default)
+```
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+```
+
+- New Pods come up first
+- Old Pods go down gradually
+- Zero downtime if configured properly
+- 💡 Production standard
+
+### 2️⃣ Recreate
+```
+strategy:
+  type: Recreate
+```
+
+- Old Pods killed first
+- New Pods created next
+- Causes downtime ❌
+Used when:
+- App cannot run multiple versions
+- DB schema breaking changes
+```
+kubectl rollout history deployment payment-deploy
+kubectl rollout undo deployment payment-deploy
+kubectl rollout undo deployment payment-deploy --to-revision=2
+kubectl scale deployment payment-deploy --replicas=5
+```
+- “A Deployment manages ReplicaSets and Pods declaratively, providing scaling, rolling updates, and rollbacks. It is the standard way to run stateless applications in Kubernetes and enables zero-downtime deployments.”
+- “Rollback issues often happen when revisionHistoryLimit is set too low, because Kubernetes deletes old ReplicaSets required for rollback.”
+
+- “Rollbacks can fail even when history exists because rollback is just another rollout. If configs, probes, schemas, or infrastructure have changed, the old version may no longer start or become ready. That’s why mature teams design for backward compatibility and test rollback paths.”
+```
+
+
+kubectl set image deployment payment-deploy \
+payment=payment-service:v2
+
+(This created a new ReplicaSet, not a rollback)
+kubectl patch deployment payment-deploy \
+-p '{"spec":{"revisionHistoryLimit":10}}'
+```
+- “When rollback fails even with an old ReplicaSet present, I inspect rollout status, Pod events, logs, probe failures, config drift, and resource constraints. If needed, I bypass rollback by scaling the old ReplicaSet or forcing an image rollback to create a fresh ReplicaSet, restoring service first and fixing root causes afterward.”
+
 ## 6. Namespaces
 
 Namespaces allow you to divide cluster resources between multiple users via resource isolation.
@@ -108,8 +203,44 @@ Example: Creating a Namespace
 kubectl create namespace dev
 ```
 ## 7. Services
+- A Service exposes a group of Pods using a stable virtual IP and DNS name, and load-balances traffic to healthy Pods selected by labels.
+- 1️⃣ Service selects Pods using labels
+- 2️⃣ Endpoints / EndpointSlices created: These are Pod IPs, updated dynamically.
+- 3️⃣ kube-proxy routes traffic
+  - Service gets a ClusterIP
+  - kube-proxy programs iptables / IPVS
+  - Traffic load-balanced at L4 (TCP/UDP)
 
-A Service in Kubernetes is an abstraction that defines a logical set of Pods and enables network access to them.
+### 1️⃣ ClusterIP (default)
+
+- Internal only
+- Used for microservice communication
+- Most common
+
+### 2️⃣ NodePort
+- Exposes service on every node
+```
+nodeIP:nodePort
+```
+- Used for testing / debugging
+
+⚠️ Not recommended for prod internet traffic.
+
+### 3️⃣ LoadBalancer (cloud)
+- Creates cloud LB (ELB, ALB, NLB, etc.)
+- Public or private
+- Production external access
+
+### 4️⃣ Headless Service (IMPORTANT)
+- No load balancing
+- DNS returns Pod IPs directly
+- Used by StatefulSets (DBs, Kafka)
+
+| Field      | Meaning                           |
+| ---------- | --------------------------------- |
+| port       | Service port                      |
+| targetPort | Container port                    |
+| nodePort   | Exposed node port (NodePort only) |
 
 Example: Service YAML
 
@@ -125,12 +256,134 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+      nodePort:30800
   type: ClusterIP
 ```
+- “targetPort is the port where the application listens inside the container. port is the Service’s virtual port used by clients. nodePort exposes that Service on every node’s IP for external access. Traffic flows from nodePort → port → targetPort.”
+
+| Scenario        | Port to use |
+| --------------- | ----------- |
+| Pod → Pod       | targetPort  |
+| Pod → Service   | port        |
+| External → Node | nodePort    |
+
 
 ## 8. Volumes
 
-Kubernetes Volumes are used for persistent storage that can be used by Pods.
+- A Volume in Kubernetes is a way to store and share data that:
+- Survives container restarts
+- Can be shared between containers in a Pod
+- Can be ephemeral or persistent
+- Kubernetes Volumes are used for persistent storage that can be used by Pods.
+- A Kubernetes volume provides storage to Pods that is independent of the container lifecycle.
+
+### Why volumes exist (real problem)
+
+- Without volumes:
+  - Container restarts = data lost ❌
+  - Sidecar containers can’t share files ❌
+  - Logs/config/state disappear ❌
+
+- Volumes solve:
+  - Persistence
+  - Sharing
+  - Decoupling storage from containers
+
+```
+Application
+   ↓
+Pod
+   ↓
+Volume
+   ↓
+PVC
+   ↓
+PV
+   ↓
+Storage (EBS / NFS / Disk / Cloud)
+```
+
+### Volume types
+
+### 1️⃣ emptyDir (ephemeral)
+- Created when Pod starts
+- Deleted when Pod dies
+- Shared across containers in same Pod
+
+### Use cases:
+- Temp files
+- Caches
+- Sidecar log sharing
+
+### 2️⃣ hostPath (dangerous in prod)
+- Mounts node filesystem into Pod
+- Ties Pod to a node
+- Use cases:
+  - Node-level agents
+  - Debugging
+
+### 3️⃣ ConfigMap & Secret (special volumes)
+- Inject config files
+- Inject secrets as files
+  ```
+  volumes:
+  - name: config
+    configMap:
+      name: app-config
+  ```
+ 🚫 Avoid for apps.
+ 
+### 4️⃣ Persistent Volume (PV) & PVC (MOST IMPORTANT)
+### PersistentVolume (PV)
+- Cluster-level storage
+- Backed by disk (EBS, NFS, etc.)
+
+### PersistentVolumeClaim (PVC)
+- Storage request by Pod
+- Binds to a PV
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+```
+```
+volumes:
+- name: data
+  persistentVolumeClaim:
+    claimName: data-pvc
+```
+
+| Mode | Meaning             |
+| ---- | ------------------- |
+| RWO  | Mounted by one node |
+| ROX  | Read-only by many   |
+| RWX  | Read-write by many  |
+
+💡 EBS = RWO
+💡 NFS/EFS = RWX
+
+### StatefulSets + Volumes (production pattern)
+- Each Pod gets its own PVC
+- PVC survives Pod restart
+- Used for DBs, Kafka, Redis
+
+```
+Application (Pod)
+   ↓ asks for storage
+PVC (request)
+   ↓ binds to
+PV (actual storage)
+   ↓ provisioned by
+StorageClass (how storage is created)
+```
 
 Example: Persistent Volume (PV) and Persistent Volume Claim (PVC)
 ```
@@ -155,6 +408,21 @@ spec:
     requests:
       storage: 1Gi
 ```
+
+- “PV = the disk that exists somewhere”
+- 1️⃣ StorageClass = How storage is created
+✔ Defines:
+- Which storage (EBS, EFS, NFS, Ceph, etc.)
+- How it’s created (disk type, IOPS, AZ behavior)
+- Which CSI driver
+```
+provisioner: ebs.csi.aws.com   # EBS
+provisioner: efs.csi.aws.com   # EFS
+
+```
+- “StorageClass defines how storage like EBS or EFS is provisioned, a PVC requests how much storage is needed, Kubernetes creates or binds a PV, and the Pod mounts the PVC.”
+- - “StorageClass defines how storage is provisioned, PV represents the actual storage, PVC is a request for storage, and Pods mount PVCs—not PVs directly.”
+
 ## 9. ConfigMaps & Secrets
 
 ConfigMap: Stores configuration data in key-value pairs.
