@@ -3,8 +3,8 @@
 - Incident Management is the process of restoring service as quickly as possible when something breaks in production.
 
 🎯 Goal: Reduce downtime & user impact
-❌ Not about blame
-❌ Not about permanent fixes (that’s Problem Management)
+-  Not about blame
+-  Not about permanent fixes (that’s Problem Management)
 
 ### What counts as an incident?
 - Website down ❌
