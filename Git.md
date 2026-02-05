@@ -53,6 +53,7 @@
 - ✔️ Preferred in teams
 
 - git merge integrates changes from one branch into another. It can result in a fast-forward merge or a three-way merge. If the same code is changed in both branches, Git raises a merge conflict which must be resolved manually.
+- No, git pull does not overwrite committed changes. If changes are uncommitted, Git may block the pull or cause conflicts. Best practice is to commit or stash changes before pulling.
 ---
 
 ## Remote Repositories
@@ -63,14 +64,32 @@
 - **`git pull <remote> <branch>`**: Fetches and merges changes from the remote repository into the current branch.
 - **`git fetch <remote>`**: Downloads commits, files, and refs from a remote repository.
 
+| Command   | Downloads changes | Merges changes | Risk     |
+| --------- | ----------------- | -------------- | -------- |
+| git fetch | ✅ Yes             | ❌ No           | 🟢 Safe  |
+| git pull  | ✅ Yes             | ✅ Yes          | 🔴 Risky |
+
 ---
 
 ## Undoing Changes
 
 - **`git checkout -- <file>`**: Discards changes in the specified file.
-- **`git reset <file>`**: Unstages a staged file.
+- **`git reset <file>`**: Unstages a staged file and keep the changes.
+  ```
+  git reset --soft HEAD~1
+  ```
+- Result:
+  - Commit removed
+  - Changes still in staging
+
 - **`git reset --hard`**: Resets the working directory to the last commit, discarding all changes.
 
+| Command     | Purpose                |
+| ----------- | ---------------------- |
+| git reset   | Undo commits / unstage |
+| git restore | Undo file changes      |
+
+- git reset is used to move the current branch pointer to a specific commit and optionally reset the staging area and working directory. It has soft, mixed, and hard modes depending on how much history and changes you want to undo.
 ---
 
 ## Viewing Changes
@@ -91,7 +110,7 @@
 
 - **`git config --global user.name "Your Name"`**: Sets the global username for commits.
 - **`git config --global user.email "your.email@example.com"`**: Sets the global email for commits.
-
+- Git config is required to define user identity and control Git’s behavior. It ensures commits are correctly attributed and allows consistent workflows across repositories and teams.
 ---
 
 ## Stashing
@@ -107,7 +126,7 @@
 
 - **`git rebase <branch>`**: Applies your changes on top of another branch.
 - **`git rebase -i <commit>`**: Starts an interactive rebase from the specified commit.
-
+- git rebase reapplies commits on top of another branch to create a linear history. It’s commonly used to update feature branches with the latest main branch before merging.
 ---
 
 ## Cherry Picking
