@@ -86,14 +86,12 @@ terraform apply -target=aws_instance.web # Only applies a specific resource.
 
 ## 1. Variable Precedence
 Terraform evaluates variables in the following order:
-1. **Environment variables**
-2. **.tfvars** file (if present)
-3. **.tfvars.json**
-4. **\*.auto.tfvars** or **\*.auto.tfvars.json**
-5. **Any -var or -var-file options** on the CLI
-
-- The order is CLI -var, then -var-file, environment variables, terraform.tfvars, *.auto.tfvars, and finally default values in variable definitions.”
-  
+- Any -var and -var-file options on the command line in the order provided and variables from HCP Terraform
+- Any *.auto.tfvars or *.auto.tfvars.json files in lexical order
+- The terraform.tfvars.json file
+- The terraform.tfvars file
+- Environment variables
+- The default argument of the variable block  
   ```
   terraform apply -var="instance_type=t3.large"
   terraform apply -var-file="prod.tfvars"
