@@ -1,8 +1,88 @@
 
-## Terraform
+# Terraform
 This guide provides a detailed and comprehensive understanding of Terraform concepts, features, and integration with GitLab. It is designed to cover essential to advanced topics, including examples and explanations for each concept.
 
 ---
+## Terraform Init
+***Terraform init*** is the bootstrap command in Terraform. It prepares your working directory so everything else can run smoothly.
+
+### What actually happens when you run it
+
+1. ***Downloads providers:*** Pulls required providers (AWS, Azure, GCP, etc.) based on your required_providers block.
+
+2. ***Initializes the backend:*** Sets up state storage (local or remote like S3 + DynamoDB). This is where Terraform decides where your state lives.
+
+3. ***Configures modules:*** Downloads any modules referenced in your configuration.
+
+4. ***Prepares the working directory:*** Creates the .terraform/ directory and a .terraform.lock.hcl file (provider version lock).
+
+```
+terraform init
+terraform init -reconfigure #Use when:Backend config changed, Switching from local → S3 & Region/bucket/key changed
+terraform init -migrate-state #Use when: Moving state from local to remote & Changing backend but want to keep state
+terraform init -upgrade #Forces Terraform to download newer provider versions (within constraints).
+terraform init -backend=false #Disable backend (rare, but useful for debugging)
+terraform force-unlock <LOCK_ID> #State lock error
+```
+- "terraform init initializes the working directory by configuring the backend, downloading providers and modules, and preparing Terraform to manage infrastructure safely."
+---
+
+## Terraform Plan
+- ***terraform plan*** shows you what Terraform will change before it actually touches your infrastructure.
+- Terraform compares:
+  - Desired state → your .tf files
+  - Current state → terraform.tfstate (local or remote)
+  - Real infrastructure → AWS / Azure / GCP APIs
+- And then outputs an execution plan.
+
+### What you’ll see in the output
+  ```
+    + Create resources
+    ~ Update in-place
+    - Destroy resources
+    -/+ Recreate (destroy then create)
+  ```
+  ```
+  terraform plan -out=tfplan #terraform plan -out=tfplan
+  terraform plan -var="env=dev" #Use Vars
+  terraform plan -var-file=dev.tfvars
+  terraform plan -target=aws_instance.web # Target a specific resource
+  terraform plan -refresh-only #Changes made manually in AWS console & Drift between state and real infra
+  ```
+- "terraform plan generates an execution plan by comparing the desired configuration with the current state and real infrastructure, allowing teams to review changes before applying them."
+- State never changes during plan.
+
+## Terraform apply
+- terraform apply is the moment Terraform actually does the work, It takes the plan and changes real infrastructure, then updates the state.
+- After successful changes only, Terraform writes the new values into state.
+
+```
+terraform apply
+terraform plan -out=tfplan
+terraform apply tfplan #Guarantees what you reviewed is what gets applied
+terraform apply -auto-approve
+terraform apply -refresh-only #Updates state, Does NOT change infra, Used to accept console changes
+terraform apply -target=aws_instance.web # Only applies a specific resource.
+```
+---
+
+## Terraform Destroy
+- terraform destroy removes all infrastructure that is tracked in the current Terraform state.
+- Terraform:
+  - Reads the state file
+  - Figures out which resources exist
+  - Calls cloud APIs to delete them
+  - Updates the state → empty (or removes those resources)
+
+  ```
+  terraform destroy -auto-approve
+  terraform destroy -var-file=dev.tfvars
+  terraform destroy -target=aws_instance.web
+  ```
+
+
+
+
 
 ## 1. Variable Precedence
 Terraform evaluates variables in the following order:
