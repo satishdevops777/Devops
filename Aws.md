@@ -285,6 +285,91 @@ aws sts get-session-token \
 ✅ In short: 
 - MFA = extra security layer for AWS accounts. 
 - Enable it for root + IAM users, enforce it with policies, and use it with CLI/roles when needed.
+---
+# IAM - Architect View
+---
+
+| Identity Type      | Used For                     | Architect Concern    |
+| ------------------ | ---------------------------- | -------------------- |
+| IAM User           | Legacy / specific automation | Avoid overuse        |
+| IAM Role           | Workloads, cross-account     | Preferred            |
+| Federated Identity | Enterprise users             | SSO integration      |
+| Root User          | Account ownership            | Lock down completely |
+
+## Policies (Where Architecture Matters)
+- There are 4 important policy layers you design:
+  - Identity-based policies
+  - Resource-based policies
+  - Permission boundaries
+  - SCPs (Service Control Policies via AWS Organizations)
+
+## Multi-Account IAM Architecture (Enterprise Design)
+
+```vbnet
+AWS Organization
+│
+├── Management Account
+├── Security Account
+├── Shared Services Account
+├── Dev Account
+├── QA Account
+└── Prod Account
+
+```
+
+- Isolation, Blast radius control, Compliance separation, Environment segregation
+
+## IAM Role Strategy
+
+
+### 🔹 Workload Roles
+  - EC2 Role
+  - Lambda Role
+  - ECS Task Role
+  - No access keys stored.
+
+## 🔹 Cross-Account Roles
+- Used for:
+  - Dev → Access Shared Services
+  - Security → Audit All Accounts
+  - CI/CD → Deploy to Prod
+  - Uses Trust Policy
+
+  ```json
+  {
+  "Effect": "Allow",
+  "Principal": {
+    "AWS": "arn:aws:iam::123456789012:root"
+  },
+  "Action": "sts:AssumeRole"
+  }
+  ```
+## Federation & Enterprise Identity
+- As architect, you integrate AWS with:
+  - Active Directory
+  - Azure AD
+  - Okta
+  - SAML Providers
+  - OIDC
+- Now AWS users don’t exist locally → they login via SSO.
+- Modern approach: 👉 AWS IAM Identity Center
+- This replaces large IAM user management.
+
+## IAM Security Design Principles
+
+### 🔐 Principle of Least Privilege
+- Only required actions allowed.
+
+### 🔐 Zero Trust Approach
+- Every request must be authenticated & authorized.
+
+### 🔐 Separation of Duties
+- Dev cannot modify billing
+- Ops cannot change IAM policies
+- Security has read-only audit
+
+### 🔐 Defense in Depth
+- Use: IAM, SCP, Permission boundaries, Resource policies, CloudTrail logging
 
 
 ## RDS Proxy
