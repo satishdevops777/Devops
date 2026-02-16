@@ -371,6 +371,52 @@ AWS Organization
 ### 🔐 Defense in Depth
 - Use: IAM, SCP, Permission boundaries, Resource policies, CloudTrail logging
 
+## Governance Controls You Must Design
+
+| Control               | Why                                                  |
+| --------------------- | ---------------------------------------------------- |
+| SCPs                  | Prevent dangerous actions (e.g., disable CloudTrail) |
+| Permission Boundaries | Limit power of IAM creators                          |
+| Tag-based IAM         | ABAC (Attribute Based Access Control)                |
+| MFA Enforcement       | Secure human access                                  |
+| Access Analyzer       | Detect over-permissions                              |
+
+### Architect-Level IAM Blueprint Summary
+
+| Layer      | What You Design                 |
+| ---------- | ------------------------------- |
+| Identity   | SSO via Identity Center         |
+| Accounts   | Multi-account via Organizations |
+| Workloads  | IAM Roles only                  |
+| Governance | SCP + Boundaries                |
+| Audit      | Central CloudTrail              |
+| Security   | Least Privilege + MFA           |
+
+
+| Layer               | Attached To | Grants Permission? | Restricts? | Scope           |
+| ------------------- | ----------- | ------------------ | ---------- | --------------- |
+| Identity Policy     | User/Role   | ✅ Yes              | ❌ No       | Single identity |
+| Resource Policy     | Resource    | ✅ Yes              | ❌ No       | That resource   |
+| Permission Boundary | User/Role   | ❌ No               | ✅ Yes      | That identity   |
+| SCP                 | Account/OU  | ❌ No               | ✅ Yes      | Entire account  |
+
+```pgsql
+SCP (Outer Wall)
+    ↓
+Permission Boundary (Team Limit)
+    ↓
+Identity Policy (What user is allowed)
+    ↓
+Resource Policy (What resource allows)
+```
+- If ANY says Deny → Final = Deny.
+
+### 🚀 Final Architect Advice
+- Identity policy = Normal permission
+- Resource policy = Cross-account & special cases
+- Permission boundary = Delegation control
+- SCP = Enterprise governance
+
 
 ## RDS Proxy
 
