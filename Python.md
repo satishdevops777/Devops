@@ -294,6 +294,9 @@ print('Hello {k} {n} {a} {s} {r}'.format(s='satish', k='Shiva', a='and', n='Anus
 ```python
 result = 77/100.2
 print("The Result was {r:3.3f}".format(r=result))  # The Result was 0.769
+
+{variable:width.precisionf}
+
 ```
 
 ### 🔹 f-strings (Python 3.6+)
