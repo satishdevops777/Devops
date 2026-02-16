@@ -242,6 +242,18 @@ print(word[1:])     # 'ython'
 print(word[:4])     # 'Pyth'
 print(word[1:4])    # 'yth'
 print(word[::-1])   # 'nohtyP' (reversed)
+
+string[start : stop : step]
+start → not given → start from beginning
+stop → not given → go till end
+step → -1
+
+text = "hello"
+
+print(text[::-1])    # olleh
+print(text[::2])     # hlo  (every 2nd letter)
+print(text[1:4])     # ell
+
 ```
 
 ### Real Example:
