@@ -2,6 +2,97 @@
 
 Kubernetes is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications.
 
+- Kubernetes has two main parts:
+  - Control Plane 
+  - Worker Nodes 
+
+### 1️⃣ Control Plane (Cluster Brain)
+  - The Control Plane makes decisions.
+  - It runs these core components:
+
+  ### 🔹 API Server (kube-apiserver)
+  - What it does:
+    - Entry point to Kubernetes.
+    - All commands go through it.
+      ```
+      kubectl apply -f app.yaml
+      ```
+      You → API Server → Cluster
+    - It validates and stores your request.
+
+
+  ### 🔹 etcd (Cluster Database)
+  - Key-value store
+  - Stores all cluster state
+  - Source of truth
+  - Example:
+    - If you deploy 3 replicas, etcd stores:
+      ```
+      replicas = 3
+      ```
+    - If etcd dies → cluster state is gone.
+
+  ### 🔹 Scheduler (kube-scheduler)
+  - Decides: “Which node should run this Pod?”
+  - Example:
+    - If Node1 has 2 CPUs free and Node2 has 1 CPU free,
+    - Scheduler picks Node1 for a 2-CPU Pod.
+    - It considers:
+      - CPU
+      - Memory
+      - Taints/tolerations
+      - Affinity rules
+  
+  ### 🔹 Controller Manager (kube-controller-manager)
+  - Ensures desired state = actual state.
+  - Example:
+  - You say:
+    ```
+    replicas: 3
+    ```
+  - One Pod crashes.
+  - Controller sees:
+    ```
+    Current = 2
+    Desired = 3
+    ```
+  - It creates 1 new Pod automatically.
+  - This is the self-healing mechanism.
+
+
+## 2️⃣ Worker Nodes (Where Apps Run)
+
+### 🔹 Kubelet
+  - Agent on each node
+  - Talks to API server
+  - Ensures Pods are running
+  - Example
+    - API says: “Run nginx pod”
+  - Kubelet:
+    - Pulls image
+    - Starts container
+    - Monitors health
+  
+
+  ### 🔹 Kube-Proxy
+  - Handles networking.
+  - It:
+    - Routes traffic
+    - Implements Services
+    - Manages iptables rules
+    - Example: Service IP → forwards traffic to correct Pod.
+
+  ### 🔹 Container Runtime
+  - Runs containers.
+  - Examples:
+    - containerd
+    - CRI-O
+  - Docker (older setups)
+  - It actually executes:
+    ```
+    docker run nginx (behind the scenes)
+    ```
+
 ### Key Features:
 - Automated Deployment and Scaling
 - Self-Healing (auto-restarts, reschedules)
