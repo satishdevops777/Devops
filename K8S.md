@@ -444,7 +444,13 @@ kubectl create namespace dev
 ```
 
 ## 5. Services
-- A Service exposes a group of Pods using a stable virtual IP and DNS name, and load-balances traffic to healthy Pods selected by labels.
+- A stable network identity (IP + DNS) to access a group of Pods.
+- Ephemeral (they die and restart)
+- Their IP addresses change
+- Service gives:
+  - Stable IP
+  - Load balancing
+  - Service discovery
 - 1️⃣ Service selects Pods using labels
 - 2️⃣ Endpoints / EndpointSlices created: These are Pod IPs, updated dynamically.
 - 3️⃣ kube-proxy routes traffic
@@ -453,14 +459,16 @@ kubectl create namespace dev
   - Traffic load-balanced at L4 (TCP/UDP)
 
 ### 1️⃣ ClusterIP (default)
-
 - Internal only
 - Used for microservice communication
 - Most common
+- Use case: Frontend → Backend communication
 
 ### 2️⃣ NodePort
 - Exposes service on every node
+- Opens port like 30000–32767
 ```
+http://nodeIP:30007
 nodeIP:nodePort
 ```
 - Used for testing / debugging
@@ -471,11 +479,22 @@ nodeIP:nodePort
 - Creates cloud LB (ELB, ALB, NLB, etc.)
 - Public or private
 - Production external access
+- Example in AWS: Creates ELB/NLB automatically
 
 ### 4️⃣ Headless Service (IMPORTANT)
 - No load balancing
 - DNS returns Pod IPs directly
 - Used by StatefulSets (DBs, Kafka)
+  ```
+  clusterIP: None
+  ```
+### 4️⃣ ExternalName
+- Maps service to external DNS name.
+Example:
+```
+db.external.com
+```
+- Used for external database integration.
 
 | Field      | Meaning                           |
 | ---------- | --------------------------------- |
@@ -489,18 +508,26 @@ Example: Service YAML
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: backend
 spec:
   selector:
-    app: nginx
+    app: backend
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-      nodePort:30800
-  type: ClusterIP
+  - port: 80
+    targetPort: 8080
 ```
-- “targetPort is the port where the application listens inside the container. port is the Service’s virtual port used by clients. nodePort exposes that Service on every node’s IP for external access. Traffic flows from nodePort → port → targetPort.”
+Service:
+- Listens on port 80
+- Forwards to container port 8080
+- Load balances across all Pods with app=backend
+
+-  “targetPort is the port where the application listens inside the container. port is the Service’s virtual port used by clients. nodePort exposes that Service on every node’s IP for external access. Traffic flows from nodePort → port → targetPort.”
+-  “A Service provides a stable virtual IP and DNS name to access a dynamic set of Pods selected via labels. It abstracts Pod IP changes and provides L4 load balancing via kube-proxy using iptables or IPVS.”
+- 1️⃣ Service selector mismatch → No endpoints
+- 2️⃣ Readiness failing → No traffic
+- 3️⃣ Wrong targetPort → Connection refused
+- 4️⃣ NodePort blocked by firewall
+- 5️⃣ LoadBalancer provisioning delay
 
 | Scenario        | Port to use |
 | --------------- | ----------- |
@@ -508,8 +535,61 @@ spec:
 | Pod → Service   | port        |
 | External → Node | nodePort    |
 
+## How kube-proxy Works Internally
+---
+- kube-proxy is a small program that runs on every node.
+- Make Services send traffic to the correct Pods.
+- kube-proxy:
+- Randomly picks one Pod (iptables mode)
+- Or uses round-robin (IPVS mode)
+- That’s how load balancing happens.
 
-## 8. Volumes
+### What If kube-proxy Stops?
+- New Services won’t work
+- Pod changes won’t update routing
+- Eventually networking breaks.
+***kube-proxy runs on each node and programs Linux networking rules so that traffic sent to a Service IP is automatically redirected to one of the backend Pod IPs.***
+
+- Pods can talk across nodes because:
+- CNI creates: Overlay network (like virtual tunnel) OR Direct routing rules
+- So cross-node communication is handled by CNI, not kube-proxy.
+
+
+## 6. Ingress
+
+- Ingress is an API object that manages external access to services, typically HTTP.
+- A Layer 7 (HTTP/HTTPS) traffic router inside Kubernetes.
+- It allows:
+  - Host-based routing
+  - Path-based routing
+  - TLS termination
+  - SSL certificates
+  - Rewrite rules
+
+Example: Ingress YAML
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  rules:
+    - host: nginx.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+```
+- Service → Endpoints → Labels → Readiness → Internal Test → kube-proxy → NetworkPolicy → External LB
+
+
+## 7. Volumes
 
 - A Volume in Kubernetes is a way to store and share data that:
 - Survives container restarts
@@ -521,9 +601,9 @@ spec:
 ### Why volumes exist (real problem)
 
 - Without volumes:
-  - Container restarts = data lost ❌
-  - Sidecar containers can’t share files ❌
-  - Logs/config/state disappear ❌
+  - Container restarts = data lost 
+  - Sidecar containers can’t share files 
+  - Logs/config/state disappear 
 
 - Volumes solve:
   - Persistence
@@ -550,7 +630,11 @@ Storage (EBS / NFS / Disk / Cloud)
 - Created when Pod starts
 - Deleted when Pod dies
 - Shared across containers in same Pod
-
+  ```
+  volumes:
+  - name: cache-volume
+    emptyDir: {}
+  ```
 ### Use cases:
 - Temp files
 - Caches
@@ -583,6 +667,27 @@ Storage (EBS / NFS / Disk / Cloud)
 - Storage request by Pod
 - Binds to a PV
 
+
+- Pod requests storage via PVC. -- “I need 10GB storage.”
+- Instead of manually creating PV: Use StorageClass.
+- It dynamically provisions storage.
+- Example:
+  - In AWS → Automatically creates EBS volume
+  - In GCP → Creates Persistent Disk
+- PVC requests → StorageClass creates PV automatically.
+
+```
+Pod → PVC → StorageClass → EBS created → Attached to Node → Mounted in Pod
+```
+- If Pod moves to another node: Volume detaches & Reattaches to new node
+
+### Common Production Issues
+- 1️⃣ PVC Pending (no matching PV) - → No StorageClass or CSI issue
+- 2️⃣ Wrong access mode
+- 3️⃣ Node can’t attach disk - → Node not ready
+- 4️⃣ EBS stuck in attaching state - → IAM permission issue
+- 5️⃣ File system permissions wrong
+- 6️⃣ Disk full
 ```
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -664,7 +769,7 @@ provisioner: efs.csi.aws.com   # EFS
 - “StorageClass defines how storage like EBS or EFS is provisioned, a PVC requests how much storage is needed, Kubernetes creates or binds a PV, and the Pod mounts the PVC.”
 - - “StorageClass defines how storage is provisioned, PV represents the actual storage, PVC is a request for storage, and Pods mount PVCs—not PVs directly.”
 
-## 9. ConfigMaps & Secrets
+## 8. ConfigMaps & Secrets
 
 ConfigMap: Stores configuration data in key-value pairs.
 Secrets: Stores sensitive information such as passwords or API keys.
@@ -809,30 +914,9 @@ spec:
           averageUtilization: 50
 ```
 
-## 14. Ingress
 
-Ingress is an API object that manages external access to services, typically HTTP.
 
-Example: Ingress YAML
 
-```
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: nginx-ingress
-spec:
-  rules:
-    - host: nginx.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx-service
-                port:
-                  number: 80
-```
 ## 15. Network Policies
     
 Network Policies allow you to control the communication between Pods and Services.
