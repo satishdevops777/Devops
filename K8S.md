@@ -93,29 +93,34 @@ Kubernetes is an open-source container orchestration platform that automates the
     docker run nginx (behind the scenes)
     ```
 
+## 🔁 How Everything Works Together
+
+```
+kubectl apply -f nginx.yaml
+```
+- Step-by-step:
+- API Server receives request
+- etcd stores desired state
+- Scheduler picks a node
+- Kubelet starts container
+- Service exposes it
+- Controller ensures it stays running
+- If Pod crashes:
+  - Controller detects mismatch
+  - Creates new Pod
+  - Self-healing happens
+
 ### Key Features:
 - Automated Deployment and Scaling
 - Self-Healing (auto-restarts, reschedules)
 - Horizontal Scaling
 - Service Discovery & Load Balancing
-
 Example:
 ```bash
 kubectl version --short
 ```
-## 2. Kubernetes Architecture
-Kubernetes follows a master-slave architecture.
 
-### Components:
-**Master Node:** Controls and manages the cluster. Contains the API server, scheduler, controller manager, etc.
-
-**Worker Node:** Runs the application containers and includes components like Kubelet and Kube Proxy.
-
-```
-kubectl get nodes
-```
-
-## 3. Pods
+## 1. Pods
 
 A Pod is the smallest deployable unit in Kubernetes, which can contain one or more containers that share the same network namespace.
 
@@ -137,9 +142,10 @@ Command to create a pod:
 kubectl apply -f pod.yaml
 ```
 
-## 4. ReplicaSets
+## 2. ReplicaSets
 
-A ReplicaSet ensures that a specified number of pod replicas are running at all times. It is often used in conjunction with Deployments.
+- A ReplicaSet ensures that a specified number of pod replicas are running at all times. It is often used in conjunction with Deployments.
+- If one Pod crashes → ReplicaSet automatically creates a new one.
 
 Example: ReplicaSet YAML
 ```
@@ -164,8 +170,8 @@ spec:
             - containerPort: 80
 ```
 
-| Feature               | ReplicaSet | Deployment   |
-| --------------------- | ---------- | ------------ |
+| Feature               | ReplicaSet | Deployment      |
+| --------------------- | ---------- | ------------    |
 | Pod scaling           | ✅          | ✅            |
 | Self-healing          | ✅          | ✅            |
 | Rolling updates       | ❌          | ✅            |
@@ -183,7 +189,7 @@ spec:
 
 - Deployments create and manage ReplicaSets for you.
 - Old ReplicaSet stays (for rollback) but scaled to 0.
-- ❌ Pods getting deleted unexpectedly
+- Pods getting deleted unexpectedly
 Cause:
 - Another ReplicaSet or Deployment using same labels
   ```
@@ -193,28 +199,28 @@ Cause:
 
 - “A ReplicaSet ensures a fixed number of identical Pods are always running. It provides self-healing and scaling but does not support rolling updates. In production, ReplicaSets are typically managed by Deployments rather than used directly.”
 
-## 5. Deployments
+
+## 3. Deployments
 - A Deployment is a higher-level controller that:
   - Manages ReplicaSets
   - Ensures the desired number of Pods are running
   - Handles rolling updates, rollbacks, and scaling
+  - version history
 
-👉 In real production, you deploy Deployments, not Pods or ReplicaSets directly.
+***A ReplicaSet ensures the desired number of identical Pods are running at all times using label selectors. It operates via Kubernetes’ reconciliation loop. However, in production we typically use Deployments, which manage ReplicaSets and provide rolling updates and rollback capabilities.***
 
 ### Why Deployments exist
-
 - Without Deployments:
-- Updates cause downtime ❌
-- No rollback ❌
-- Manual Pod recreation ❌
+- Updates cause downtime 
+- No rollback 
+- Manual Pod recreation
+  
 ### Deployments give you:
-- Zero-downtime updates ✅
-- Version history ✅
-- Easy rollback ✅
-- Declarative state management ✅
-
+- Zero-downtime updates 
+- Version history 
+- Easy rollback 
+- Declarative state management 
 Example: Deployment YAML
-
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -234,6 +240,22 @@ spec:
         - name: nginx
           image: nginx
 ```
+- If you delete ReplicaSet:
+```
+kubectl delete rs nginx-rs # Pods are deleted too (unless you use --cascade=orphan).
+```
+
+- If two ReplicaSets use same label selector:
+  - They may fight over Pods.
+  - This causes unpredictable behavior.
+  - Avoid overlapping selectors.
+
+- When you update a Deployment:
+  - New ReplicaSet is created
+  - Old ReplicaSet is scaled down
+  - New ReplicaSet is scaled up
+  - So rolling update = replica set swapping.
+  
 ## Deployment Strategies
 
 ### 1️⃣ RollingUpdate (default)
@@ -244,13 +266,89 @@ strategy:
     maxSurge: 1
     maxUnavailable: 0
 ```
+- maxSurge → Extra Pods allowed during update
+- maxUnavailable → How many Pods can go down at once
+
+- Flow:
+- 1 new Pod starts (total = 5)
+- 1 old Pod stops (total = 4)
+- Repeat
+  - Users never lose capacity.
 
 - New Pods come up first
 - Old Pods go down gradually
 - Zero downtime if configured properly
 - 💡 Production standard
+  
 
-### 2️⃣ Recreate
+### 2️⃣ Blue-Green Deployment
+- You run two full environments:
+  - Blue = current production
+  - Green = new version
+ When ready:
+- Switch Service to point to Green
+- Instant cutover.
+
+####🔹 Pros
+- Instant rollback
+- Full testing before release
+
+#### 🔹 Cons
+- Double resource cost
+- Not gradual
+
+- A Kubernetes Service routes traffic based on labels.
+- It does NOT know about versions.
+- It just selects Pods with matching labels.
+```
+# Blue Deployment
+labels:
+  app: myapp
+  version: blue
+
+# Green Deployment
+labels:
+  app: myapp
+  version: green
+
+# Service Initially Points to Blue
+selector:
+  app: myapp
+  version: blue
+
+# You change Service selector:
+selector:
+  app: myapp
+  version: green
+
+```
+```
+terminationGracePeriodSeconds: 30
+```
+- App has 30 seconds to finish active requests.
+
+
+### 3️⃣ Canary Deployment
+- Release new version to small % of users first.
+- Example:
+  ```
+  90% traffic → v1
+  10% traffic → v2
+  ```
+- If stable → increase traffic gradually.
+
+#### 🔹 How It's Done
+- Options:
+  - Separate Deployments with weighted Ingress
+  - Service mesh (Istio, Linkerd)
+  - NGINX ingress weight routing
+
+#### 🔹 Best For
+  - Risky releases
+  - Large-scale systems
+  - Production safety
+
+### 4️⃣ Recreate
 ```
 strategy:
   type: Recreate
@@ -273,8 +371,6 @@ kubectl scale deployment payment-deploy --replicas=5
 
 - “Rollbacks can fail even when history exists because rollback is just another rollout. If configs, probes, schemas, or infrastructure have changed, the old version may no longer start or become ready. That’s why mature teams design for backward compatibility and test rollback paths.”
 ```
-
-
 kubectl set image deployment payment-deploy \
 payment=payment-service:v2
 
@@ -284,16 +380,70 @@ kubectl patch deployment payment-deploy \
 ```
 - “When rollback fails even with an old ReplicaSet present, I inspect rollout status, Pod events, logs, probe failures, config drift, and resource constraints. If needed, I bypass rollback by scaling the old ReplicaSet or forcing an image rollback to create a fresh ReplicaSet, restoring service first and fixing root causes afterward.”
 
-## 6. Namespaces
+
+
+## 🔐 Critical Requirements for Zero Downtime
+
+- Even with Rolling Update, you must configure:
+
+### 1️⃣ Readiness Probes
+- If not configured: Kubernetes may send traffic to unhealthy Pods.
+  ```
+  readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  ```
+- Traffic only goes to Pods that pass readiness.
+
+### 2️⃣ Proper Resource Requests
+- If new Pods can’t schedule (insufficient CPU/memory):
+- Deployment may stall.
+
+### 3️⃣ Pod Disruption Budget (PDB)
+- Prevents too many Pods from being down.
+  ```
+  minAvailable: 2
+  ```
+- Guarantees minimum availability.
+
+### 4️⃣ Graceful Shutdown
+```
+terminationGracePeriodSeconds
+```
+- And handle SIGTERM in app.
+- Prevents dropped requests.
+
+***Kubernetes supports zero-downtime deployments primarily using rolling updates with maxUnavailable set to 0 and proper readiness probes. For higher safety, blue-green or canary strategies can be implemented using separate deployments and traffic shifting via ingress or service mesh.***
+
+## 4. Namespaces
 
 Namespaces allow you to divide cluster resources between multiple users via resource isolation.
+- Organize resources
+- Isolate environments
+- Apply security policies
+- Control resource usage
+
+- Without namespaces:
+ - All Pods, Services, Deployments live together
+ - Name conflicts happen
+ - Hard to apply team-level permissions
+ - No resource isolation
+
+- With namespaces:
+ - You can have the same app name in different environments
+ - Apply RBAC per team
+ - Limit CPU/memory usage per namespace
 
 Example: Creating a Namespace
 
 ```
 kubectl create namespace dev
 ```
-## 7. Services
+
+## 5. Services
 - A Service exposes a group of Pods using a stable virtual IP and DNS name, and load-balances traffic to healthy Pods selected by labels.
 - 1️⃣ Service selects Pods using labels
 - 2️⃣ Endpoints / EndpointSlices created: These are Pod IPs, updated dynamically.
