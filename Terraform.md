@@ -246,13 +246,17 @@ Reference: `tags = local.common_tags`.
 
 ## 9. Data Sources
 Fetch information defined outside Terraform.
+```
+data "<provider>_<type>" "<name>" {
+  arguments
+}
+```
+
 Example:
 ```
 data "<PROVIDER>_<TYPE>" "<NAME>" {
   # filters
 }
-data.aws_vpc.main.id
-
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -261,6 +265,11 @@ data "aws_ami" "amazon_linux" {
     name   = "name"
     values = ["amzn2-ami-hvm-*"]
   }
+}
+
+resource "aws_instance" "web" {
+  ami           = data.aws_ami.latest_amazon_linux.id
+  instance_type = "t3.micro"
 }
 
 ```
@@ -295,7 +304,7 @@ terraform graph -type=plan | dot -Tpng > graph.png
 
 - Sensitive values are still stored in state
 - They are just masked from display
-📌 That’s why remote encrypted state is mandatory.
+- That’s why remote encrypted state is mandatory.
 
 - **HashiCorp Vault:** Securely store secrets.
 
@@ -893,3 +902,86 @@ resource "aws_s3_bucket" "example_dr" {
   bucket   = "my-example-bucket-dr"
 }
 ````
+
+### terraform validate
+
+```
+Code:
+
+resource "aws_instance" "web" {
+  ami = "ami-123456"
+  instance_typ = "t3.micro"   # typo
+}
+
+Run:
+terraform validate
+
+
+Output:
+Error: Unsupported argument
+```
+
+### ✅ Detects:
+    - Typos
+    - Invalid block structure
+    - Wrong attribute names
+
+- Does NOT detect:
+  - Security issues
+  - Open ports
+  - Misconfigurations
+ 
+### TFLint
+- TFLint checks for:
+  - Best practices
+  - Invalid instance types
+  - Deprecated arguments
+  - Region-specific validation
+
+ ```
+instance_type = "t2.nanoo"   # invalid
+Invalid instance type
+
+instance_type = "t2.micro"   # deprecated
+```
+- TFLint warns about outdated types.
+
+### tfsec scans for security misconfigurations.
+tfsec detects:
+- Security group allows ingress from 0.0.0.0/0
+- S3 bucket allows public access
+- EBS volume not encrypted
+
+``` Run: tfsec .```
+
+### Checkov is more advanced:
+- Scans Terraform
+- Scans CloudFormation
+- Scans Kubernetes YAML
+- Integrates into CI/CD
+- Dockerfiles
+- ARM
+- Helm
+
+checkov: 
+- RDS storage encryption not enabled
+- Security group allows ingress from 0.0.0.0/0
+- S3 bucket allows public access
+- EBS volume not encrypted
+```
+Run: checkov -d .
+Output: CKV_AWS_20: S3 bucket has public read access
+Skipping a Rule
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+
+  # checkov:skip=CKV_AWS_20: Internal bucket only
+}
+```
+
+
+- Policy as code: why we have to use when we have tfsec & checkov
+  - Block untagged resources
+  - Enforce encryption
+  - Restrict instance types
+
