@@ -1170,3 +1170,4 @@ Example: Deploying Prometheus
 ```
 helm install prometheus prometheus-community/kube-prometheus-stack
 ```
+***A finalizer is a metadata field on a Kubernetes resource that blocks deletion until a controller performs necessary cleanup operations. It ensures external dependencies such as cloud load balancers or persistent volumes are properly cleaned before the resource is fully removed.***
