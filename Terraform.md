@@ -984,4 +984,242 @@ resource "aws_s3_bucket" "example" {
   - Block untagged resources
   - Enforce encryption
   - Restrict instance types
+```
+Developer →
+PR →
+Lint →
+Security Scan →
+Policy Check →
+Plan →
+Manual Approval →
+Apply →
+Monitor
+```
 
+
+CICD GitLab
+
+```yml
+stages:
+  - validate
+  - security
+  - plan
+
+image: hashicorp/terraform:1.6
+
+before_script:
+  - terraform --version
+
+validate:
+  stage: validate
+  script:
+    - terraform init -backend=false
+    - terraform fmt -check -recursive
+    - terraform validate
+
+tfsec_scan:
+  stage: security
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl bash
+    - curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+  script:
+    - tfsec . --minimum-severity MEDIUM
+
+checkov_scan:
+  stage: security
+  image: python:3.10
+  before_script:
+    - pip install checkov
+  script:
+    - checkov -d . --quiet
+
+terraform_plan:
+  stage: plan
+  script:
+    - terraform init
+    - terraform plan
+  only:
+    - merge_requests
+```
+
+### Tags
+- Key-value metadata attached to cloud resources.
+```
+resource "aws_instance" "web" {
+  ami           = "ami-123456"
+  instance_type = "t3.micro"
+
+  tags = {
+    Name        = "web-server"
+    Environment = "prod"
+    Owner       = "devops"
+  }
+}
+```
+
+- Tags are not just labels. They are critical for:
+  - Cost trackin
+  - Ownership identification
+  - Environment separation
+  - Automation
+  - Security & compliance
+  - Resource cleanup
+  - Governance enforcement
+
+| Use Case      | Why Important          |
+| ------------- | ---------------------- |
+| Cost tracking | Finance visibility     |
+| Ownership     | Accountability         |
+| Environment   | Dev vs Prod            |
+| Automation    | Backup, shutdown       |
+| Governance    | Compliance enforcement |
+| Cleanup       | Easy filtering         |
+
+| Tag                | Purpose         |
+| ------------------ | --------------- |
+| Environment        | dev/stage/prod  |
+| Owner              | Team name       |
+| Application        | App identifier  |
+| CostCenter         | Finance mapping |
+| DataClassification | Public/Private  |
+| ManagedBy          | Terraform       |
+
+
+### Find the Unused EC2 instances
+```py
+import boto3
+from datetime import datetime, timedelta
+
+ec2 = boto3.client('ec2')
+cloudwatch = boto3.client('cloudwatch')
+
+instances = ec2.describe_instances()
+
+for reservation in instances['Reservations']:
+    for instance in reservation['Instances']:
+        instance_id = instance['InstanceId']
+
+        response = cloudwatch.get_metric_statistics(
+            Namespace='AWS/EC2',
+            MetricName='CPUUtilization',
+            Dimensions=[{'Name': 'InstanceId', 'Value': instance_id}],
+            StartTime=datetime.utcnow() - timedelta(days=14),
+            EndTime=datetime.utcnow(),
+            Period=1209600,
+            Statistics=['Average']
+        )
+
+        datapoints = response['Datapoints']
+        if datapoints:
+            avg_cpu = datapoints[0]['Average']
+            if avg_cpu < 5:
+                print(f"{instance_id} is idle (CPU < 5%)")
+```
+
+
+
+### Remove Unused EBS Volumes (Tag Based)
+- Criteria:
+- status = available (not attached)
+- Tag Environment = dev
+- Optional: Older than X days
+
+```py
+import boto3
+from datetime import datetime, timezone
+
+ec2 = boto3.client("ec2")
+
+ENVIRONMENT_FILTER = "dev"
+DRY_RUN = True
+AGE_DAYS = 7
+
+def volume_is_old(volume):
+    create_time = volume["CreateTime"]
+    age = datetime.now(timezone.utc) - create_time
+    return age.days >= AGE_DAYS
+
+volumes = ec2.describe_volumes(
+    Filters=[
+        {"Name": "status", "Values": ["available"]},
+        {"Name": "tag:Environment", "Values": [ENVIRONMENT_FILTER]},
+    ]
+)
+
+for vol in volumes["Volumes"]:
+    vol_id = vol["VolumeId"]
+
+    if volume_is_old(vol):
+        print(f"Candidate EBS: {vol_id}")
+
+        if not DRY_RUN:
+            ec2.delete_volume(VolumeId=vol_id)
+            print(f"Deleted: {vol_id}")
+```
+
+
+### KMS Keys 
+```
+import boto3
+from datetime import datetime, timedelta
+
+kms = boto3.client("kms")
+
+ENVIRONMENT_FILTER = "dev"
+DRY_RUN = True
+
+keys = kms.list_keys()
+
+for key in keys["Keys"]:
+    key_id = key["KeyId"]
+
+    tags = kms.list_resource_tags(KeyId=key_id)["Tags"]
+
+    tag_dict = {t["TagKey"]: t["TagValue"] for t in tags}
+
+    if tag_dict.get("Environment") == ENVIRONMENT_FILTER:
+        key_desc = kms.describe_key(KeyId=key_id)
+        state = key_desc["KeyMetadata"]["KeyState"]
+
+        if state == "Enabled":
+            print(f"Scheduling deletion for KMS key: {key_id}")
+
+            if not DRY_RUN:
+                kms.schedule_key_deletion(
+                    KeyId=key_id,
+                    PendingWindowInDays=7
+                )
+```
+
+### Empty S3 buckets
+```
+import boto3
+
+s3 = boto3.client("s3")
+
+ENVIRONMENT_FILTER = "dev"
+DRY_RUN = True
+
+buckets = s3.list_buckets()
+
+for bucket in buckets["Buckets"]:
+    bucket_name = bucket["Name"]
+
+    try:
+        tags = s3.get_bucket_tagging(Bucket=bucket_name)["TagSet"]
+        tag_dict = {t["Key"]: t["Value"] for t in tags}
+
+        if tag_dict.get("Environment") == ENVIRONMENT_FILTER:
+            objects = s3.list_objects_v2(Bucket=bucket_name)
+
+            if "Contents" not in objects:
+                print(f"Empty bucket candidate: {bucket_name}")
+
+                if not DRY_RUN:
+                    s3.delete_bucket(Bucket=bucket_name)
+                    print(f"Deleted bucket: {bucket_name}")
+
+    except Exception:
+        continue
+```
