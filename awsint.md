@@ -111,3 +111,43 @@ Durability = Probability that your data will NOT be lost
 
 ## KMS
 - KMS = Service that securely manages encryption keys in AWS.
+- It is used to encrypt:
+  - EBS volumes
+  - S3 buckets
+  - RDS databases
+  - EFS file systems
+  - Secrets
+  - Application data
+
+- A KMS key (CMK – Customer Managed Key) is:
+- A logical representation of a cryptographic key stored securely in AWS hardware security modules (HSMs).
+
+- Instead of encrypting large data directly with KMS:
+  - 1️⃣ KMS creates a Data Encryption Key (DEK)
+  - 2️⃣ DEK encrypts your actual data
+  - 3️⃣ DEK itself is encrypted using the KMS master key
+  - 4️⃣ Encrypted DEK stored with data
+
+- When decrypting:
+  - KMS decrypts DEK
+  - DEK decrypts data
+  - This is called Envelope Encryption.
+
+- You pay for:
+  - Number of keys
+  - API requests (Encrypt/Decrypt)
+  - Custom key usage
+
+***AWS KMS is a managed key management service that allows secure creation, storage, and control of encryption keys. It uses envelope encryption to protect data and integrates with AWS services like S3, EBS, and RDS. It provides centralized control, auditing, and automatic key rotation.***
+
+## Secrets Manager
+- Secrets Manager = Secure vault for sensitive credentials.
+- Secrets Manager solves this by:
+- ✔ Encrypting secrets using AWS Key Management Service
+- ✔ Automatic rotation
+- ✔ IAM-based access control
+- ✔ Audit logging
+
+**AWS Secrets Manager is a managed service that securely stores and rotates sensitive credentials such as database passwords and API keys. It encrypts secrets using KMS, provides fine-grained IAM access control, and supports automatic rotation to improve security and compliance.**
+
+**Secrets rotation in AWS Secrets Manager is performed using a Lambda function that generates a new credential, updates the target system (like RDS), updates the stored secret, and validates it. Secrets are encrypted using KMS via envelope encryption, where a data encryption key encrypts the secret and is itself encrypted with a master KMS key.**
