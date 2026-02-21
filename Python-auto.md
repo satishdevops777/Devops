@@ -223,4 +223,20 @@ def lambda_handler(event, context):
 
     print("Lambda finished")
 ```
+### Reusable Template
+```py
+def get_resources():
+    pass
 
+def evaluate(resource):
+    pass
+
+def remediate(resource):
+    pass
+
+def main():
+    resources = get_resources()
+    for r in resources:
+        if evaluate(r):
+            remediate(r)
+```
