@@ -334,3 +334,17 @@ def lambda_handler(event, context):
     print("Snapshot cleanup finished")
     return {"status": "completed"}
 ```
+```python
+import logging
+from botocore.exceptions import ClientError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+try:
+    logger.info(f"Deleting snapshot {snapshot_id}")
+    ec2.delete_snapshot(SnapshotId=snapshot_id)
+    logger.info(f"Deleted {snapshot_id}")
+except ClientError as e:
+    logger.error(f"Failed to delete {snapshot_id}: {e}")
+```
