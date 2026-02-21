@@ -240,3 +240,93 @@ def main():
         if evaluate(r):
             remediate(r)
 ```
+
+
+```py
+import boto3
+import logging
+from datetime import datetime, timedelta, timezone
+import config
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+ec2 = boto3.client("ec2")
+cloudwatch = boto3.client("cloudwatch")
+
+
+def get_avg_cpu(instance_id):
+    try:
+        response = cloudwatch.get_metric_statistics(
+            Namespace="AWS/EC2",
+            MetricName="CPUUtilization",
+            Dimensions=[{"Name": "InstanceId", "Value": instance_id}],
+            StartTime=datetime.now(timezone.utc) - timedelta(days=config.DAYS),
+            EndTime=datetime.now(timezone.utc),
+            Period=86400,
+            Statistics=["Average"]
+        )
+
+        datapoints = response["Datapoints"]
+
+        if not datapoints:
+            return None
+
+        avg = sum(dp["Average"] for dp in datapoints) / len(datapoints)
+        return avg
+
+    except Exception as e:
+        logger.error(f"Error fetching metrics for {instance_id}: {e}")
+        return None
+
+
+def stop_instance(instance_id):
+    if config.DRY_RUN:
+        logger.info(f"[DRY RUN] Would stop {instance_id}")
+        return
+
+    try:
+        ec2.stop_instances(InstanceIds=[instance_id])
+        logger.info(f"Stopped instance {instance_id}")
+    except Exception as e:
+        logger.error(f"Error stopping {instance_id}: {e}")
+
+
+def process_instances():
+    response = ec2.describe_instances(
+        Filters=[
+            {"Name": "instance-state-name", "Values": ["running"]},
+            {"Name": "tag:Environment", "Values": [config.ENVIRONMENT_FILTER]}
+        ]
+    )
+
+    for reservation in response["Reservations"]:
+        for instance in reservation["Instances"]:
+            instance_id = instance["InstanceId"]
+
+            avg_cpu = get_avg_cpu(instance_id)
+
+            if avg_cpu is None:
+                continue
+
+            logger.info(f"{instance_id} → Avg CPU: {avg_cpu:.2f}%")
+
+            if avg_cpu < config.CPU_THRESHOLD:
+                stop_instance(instance_id)
+
+
+def lambda_handler(event, context):
+    logger.info("Automation started")
+    process_instances()
+    logger.info("Automation completed")
+```
+
+
+
+
+
+
+
+
+
