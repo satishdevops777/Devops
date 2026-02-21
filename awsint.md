@@ -107,3 +107,7 @@ Durability = Probability that your data will NOT be lost
 | Bursting    | Limited    | Medium      | Yes           | Small workloads            |
 | Provisioned | No         | High        | No            | Consistent heavy workloads |
 | Elastic     | Yes        | High        | No            | Variable workloads         |
+
+
+## KMS
+- KMS = Service that securely manages encryption keys in AWS.
