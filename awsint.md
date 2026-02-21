@@ -44,6 +44,7 @@ If:
 
 RTO = Recovery Time Objective
 (How fast system must recover)
+- Maximum acceptable downtime after a failure.
 - The maximum amount of time your system can be down after a failure before it causes unacceptable business impact.
   
 
@@ -82,3 +83,27 @@ Durability = Probability that your data will NOT be lost
 - officially called Data Lifecycle Manager (DLM) in Amazon Web Services, is a service that automates creation, retention, and deletion of EBS snapshots.
 
 👉 Instead of manually creating backups, DLM does it automatically based on policies.
+
+## EFS 
+- Amazon EFS (Elastic File System) is a fully managed file storage service in Amazon Web Services.
+- 👉 It provides shared file storage that multiple servers (EC2 instances) can access at the same time.
+
+### 🔎 How EFS Works
+- It is regional (not limited to one AZ)
+- Automatically replicated across multiple AZs
+- Accessed using NFS protocol
+- Scales automatically (no storage limit to manage)
+
+| Feature      | EFS          | EBS             |
+| ------------ | ------------ | --------------- |
+| Storage Type | File storage | Block storage   |
+| Sharing      | Multiple EC2 | Usually 1 EC2   |
+| AZ Scope     | Multi-AZ     | Single AZ       |
+| Scaling      | Automatic    | Manual resize   |
+| Use Case     | Shared files | OS / DB storage |
+
+| Mode        | Auto Scale | Predictable | Credit System | Best Use Case              |
+| ----------- | ---------- | ----------- | ------------- | -------------------------- |
+| Bursting    | Limited    | Medium      | Yes           | Small workloads            |
+| Provisioned | No         | High        | No            | Consistent heavy workloads |
+| Elastic     | Yes        | High        | No            | Variable workloads         |
