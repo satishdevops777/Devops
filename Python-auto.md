@@ -167,7 +167,7 @@ for bucket in buckets["Buckets"]:
 
 
 Working
-```
+```python
 import boto3
 from datetime import datetime, timedelta, timezone
 
