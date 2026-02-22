@@ -1,3 +1,5 @@
+
+
 # AWS
 
 
@@ -249,3 +251,68 @@ After 365 days → Delete
 | **Geoproximity**       | Routes based on geographic distance (can shift bias) | Traffic shifting between regions | ✅ Yes                 | Shift 20% traffic from EU to Asia |
 | **Multi-Value Answer** | Returns multiple healthy IPs                         | Basic load balancing             | ✅ Yes                 | Multiple EC2 IPs returned         |
 | **IP-Based Routing**   | Routes based on client IP CIDR                       | Enterprise routing rules         | ❌ No                  | Corporate IP → Internal endpoint  |
+
+
+## Load Balancers
+- A Load Balancer distributes incoming traffic across multiple servers so:
+  - No single server is overloaded
+  - High availability
+  - Fault tolerance
+
+- Types:
+  - ALB (Application Load Balancer – Layer 7)
+  - NLB (Network Load Balancer – Layer 4)
+  - CLB (Legacy)
+- Most common today → ALB
+
+- Target Group = A group of backend servers that receive traffic.
+  - Targets can be:
+    - EC2 instances
+    - IP addresses
+    - Lambda functions
+    - EKS pods (via IP mode)
+   
+### ❤️ Health Checks
+- ALB performs health checks
+  ```
+  GET /health
+  ```
+- This ensures:
+  - ✔ No traffic sent to unhealthy servers
+  - ✔ Automatic recovery
+
+### Auto Scaling automatically:
+- Adds servers when traffic increases
+- Removes servers when traffic decreases
+- Service: Amazon EC2 Auto Scaling
+
+### How Load Balancer + Auto Scaling Work Together
+- Step-by-step:
+  - 1️⃣ Traffic increases
+  - 2️⃣ CPU crosses threshold
+  - 3️⃣ Auto Scaling launches new EC2
+  - 4️⃣ New EC2 registers automatically in Target Group
+  - 5️⃣ ALB starts sending traffic to new instance
+
+- When traffic drops:
+  - 1️⃣ Auto Scaling terminates instance
+  - 2️⃣ Instance deregistered from Target Group
+  - 3️⃣ ALB stops sending traffic
+
+- Completely automatic.
+
+### 🔥 Important Concepts
+- Deregistration Delay
+- When instance removed:
+  - ALB waits (default 300 seconds)
+  - To finish active connections.
+  - Prevents dropped requests.
+- Sticky Session (also called Session Affinity) means:
+  - A user’s requests are always sent to the same backend server for a period of time.
+  - Instead of load balancer sending each request to any healthy server, it “sticks” a user to one specific target.
+  - This feature exists in
+    - Elastic Load Balancing (especially ALB and CLB).
+
+ 
+***A Load Balancer distributes incoming traffic across multiple backend targets grouped in a Target Group. Auto Scaling dynamically adjusts the number of backend instances based on metrics such as CPU utilization. When new instances are launched, they are automatically registered with the load balancer’s target group, and when terminated, they are deregistered to ensure seamless traffic distribution and high availability.***
+
