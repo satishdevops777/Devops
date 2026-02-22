@@ -359,3 +359,155 @@ that allows you to:
 | Used for APIs   | Sometimes | Yes      |
 
 ***A CDN is a globally distributed network that caches content at edge locations closer to users to reduce latency and improve performance. In AWS, CloudFront is used as a CDN and can sit in front of S3, ALB, or API Gateway to accelerate content delivery and enhance security.***
+
+## 1️⃣ AWS Organization & Landing Zone Design
+### Architecture Design
+```
+AWS Organization
+│
+├── Management Account
+├── Security Account
+├── Log Archive Account
+├── Shared Services Account
+├── Dev Account
+├── QA Account
+└── Prod Account
+```
+
+- Why Multi-Account?
+  - ✔ Blast radius reduction
+  - ✔ Environment isolation
+  - ✔ Compliance separation
+  - ✔ Centralized governance
+ 
+### 🛡️ SCP Guardrails
+- Apply SCPs:
+  - Deny disabling CloudTrail
+  - Deny deleting backups
+  - Restrict root usage
+  - Restrict public S3
+
+## 2️⃣ Landing Zone (Foundation)
+- Use AWS Control Tower or custom baseline.
+- Landing Zone Includes:
+  - ✔ Centralized CloudTrail
+  - ✔ GuardDuty
+  - ✔ Security Hub
+  - ✔ Config Rules
+  - ✔ IAM baseline roles
+  - ✔ Central logging bucket
+  - ✔ KMS governance
+- Security & compliance built from day 1.
+
+## 3️⃣ Network Architecture (Highly Available)
+- In Prod Account:
+- VPC Design
+  - 1 VPC per region
+  - 3 Availability Zones
+  - Public subnets (ALB)
+  - Private subnets (App)
+  - DB subnets (isolated)
+  - NAT Gateway per AZ
+  - No single AZ dependency.
+
+## 4️⃣ Application Architecture (HA + Scalable)
+```
+Flow:
+
+User
+↓
+CloudFront
+↓
+WAF
+↓
+ALB (Multi-AZ)
+↓
+EKS / Auto Scaling EC2
+↓
+RDS (Multi-AZ)
+↓
+S3
+```
+## 5️⃣ Multi-Region DR Strategy
+- Now we design DR.
+  - Primary Region: ap-south-1
+  - Secondary Region: ap-southeast-1
+
+## DR Options
+| Strategy         | RTO       | RPO       | Cost      |
+| ---------------- | --------- | --------- | --------- |
+| Backup & Restore | Hours     | Hours     | Low       |
+| Pilot Light      | 1–2 hours | Minutes   | Medium    |
+| Warm Standby     | 5–15 mins | Near zero | High      |
+| Active-Active    | Seconds   | Zero      | Very High |
+
+
+
+## 6️⃣ Cost Optimization Strategy
+- Enterprise cost control includes:
+- Compute
+  - ✔ Use Reserved Instances / Savings Plans
+  - ✔ Auto Scaling
+  - ✔ Spot instances for non-prod
+  - ✔ Right-size using Compute Optimizer
+  - 
+- Storage
+  - ✔ S3 lifecycle policies
+  - ✔ EBS gp3 instead of gp2
+  - ✔ Snapshot lifecycle management
+
+- Database
+  - ✔ Right-size RDS
+  - ✔ Use Aurora serverless if applicable
+  - ✔ Read replicas only when needed
+
+## 7️⃣ RPO & RTO Definition (Enterprise Example)
+- Let’s define business requirement:
+  - RTO = 15 minutes
+  - RPO = 5 minutes
+
+- Design decisions:
+  - ✔ Multi-AZ DB
+  - ✔ Cross-region read replica
+  - ✔ Route 53 failover
+  - ✔ TTL = 60 seconds
+  - ✔ Infrastructure as Code
+
+## 🔐 8️⃣ Security & Compliance
+- ✔ KMS encryption everywhere
+- ✔ Secrets Manager
+- ✔ IAM least privilege
+- ✔ WAF + Shield
+- ✔ VPC endpoints (private access)
+- ✔ Central log archive
+
+## 9️⃣ Observability & SRE Layer
+  - ✔ CloudWatch metrics
+  - ✔ Centralized logging
+  - ✔ Alarms on 5xx errors
+  - ✔ Synthetic monitoring
+  - ✔ Chaos testing
+
+## 10️⃣ Blast Radius Reduction
+- ✔ Separate accounts
+- ✔ SCP guardrails
+- ✔ Separate KMS keys per account
+- ✔ No cross-environment access
+
+**To design a highly available and cost-optimized AWS environment, I start with AWS Organizations and a multi-account landing zone for governance and isolation. I implement multi-AZ infrastructure using ALB and Auto Scaling for compute and RDS Multi-AZ for databases. For disaster recovery, I deploy a warm standby in a secondary region with cross-region replication and Route 53 failover routing. I define RTO and RPO targets and align the DR strategy accordingly while continuously optimizing cost through Savings Plans, lifecycle policies, and right-sizing.**
+
+## Final Enterprise Architecture Layers
+
+| Layer        | Strategy                  |
+| ------------ | ------------------------- |
+| Organization | Multi-account             |
+| Security     | SCP + Central logging     |
+| Network      | Multi-AZ                  |
+| Compute      | Auto Scaling              |
+| Database     | Multi-AZ + Replica        |
+| DR           | Warm standby              |
+| DNS          | Route 53 failover         |
+| Cost         | Savings Plans + lifecycle |
+| Monitoring   | CloudWatch + alarms       |
+
+
