@@ -151,3 +151,60 @@ Durability = Probability that your data will NOT be lost
 **AWS Secrets Manager is a managed service that securely stores and rotates sensitive credentials such as database passwords and API keys. It encrypts secrets using KMS, provides fine-grained IAM access control, and supports automatic rotation to improve security and compliance.**
 
 **Secrets rotation in AWS Secrets Manager is performed using a Lambda function that generates a new credential, updates the target system (like RDS), updates the stored secret, and validates it. Secrets are encrypted using KMS via envelope encryption, where a data encryption key encrypts the secret and is itself encrypted with a master KMS key.**
+
+## S3
+- Amazon S3 (Simple Storage Service) is an object storage service from
+Amazon Web Services.
+- 👉 It stores and retrieves any amount of data from anywhere over the internet.
+- S3 = Highly durable, scalable cloud storage.
+
+### 🔥 Why S3 Is Powerful
+- ✔ 11 9s durability (99.999999999%)
+- ✔ Infinite scalability
+- ✔ Pay only for what you use
+- ✔ Multi-AZ redundancy
+- ✔ Highly secure
+- ✔ Integrates with almost every AWS service
+
+### 📦 S3 Storage Classes (Cost Optimization)
+
+| Storage Class        | Use Case             |
+| -------------------- | -------------------- |
+| Standard             | Frequently accessed  |
+| Intelligent-Tiering  | Unpredictable access |
+| Standard-IA          | Infrequent access    |
+| One Zone-IA          | Non-critical data    |
+| Glacier Instant      | Rare access          |
+| Glacier Flexible     | Archive              |
+| Glacier Deep Archive | Long-term backup     |
+
+### 🔄 S3 Lifecycle Policies
+- You can automatically:
+- Move objects to cheaper storage
+- Delete old objects
+- Transition to Glacier after 30 days
+
+Example:
+```
+After 30 days → Move to IA  
+After 90 days → Move to Glacier  
+After 365 days → Delete
+```
+
+### 🔐 Security in S3
+
+- S3 security works at multiple layers:
+- 1️⃣ IAM Policies: Control who can access S3.
+- 2️⃣ Bucket Policies: Resource-based policy controlling access to bucket.
+- 3️⃣ Encryption: 
+  - SSE-S3 (AWS managed)
+  - SSE-KMS (KMS managed)
+  - Client-side encryption
+- 4️⃣ Block Public Access: Prevents accidental public exposure.
+- 5️⃣ Versioning
+  - Protects against:
+    - Accidental deletion
+    - Overwrite
+    - Ransomware
+    
+  ***Amazon S3 is a highly durable, scalable object storage service used for storing files, backups, logs, and application data. It supports multiple storage classes for cost optimization, integrates with IAM and KMS for security, and provides lifecycle policies for automated data management.***
