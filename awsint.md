@@ -208,3 +208,44 @@ After 365 days → Delete
     - Ransomware
     
   ***Amazon S3 is a highly durable, scalable object storage service used for storing files, backups, logs, and application data. It supports multiple storage classes for cost optimization, integrates with IAM and KMS for security, and provides lifecycle policies for automated data management.***
+
+## Route53
+- Amazon Route 53 is a highly available and scalable DNS (Domain Name System) service from Amazon Web Services.
+- 👉 It translates domain names into IP addresses.
+
+- Route 53 provides 3 main capabilities:
+  - 1️⃣ Domain Registration
+  - 2️⃣ DNS Management
+  - 3️⃣ Health Checking & Traffic Routing
+
+### 🏗️ Hosted Zones
+- A Hosted Zone is a container for DNS records.
+
+***🔹 Public Hosted Zone***
+- Accessible from internet.
+
+***🔹 Private Hosted Zone***
+- Works inside VPC only.
+
+| Record | Purpose              |
+| ------ | -------------------- |
+| A      | Maps domain → IPv4   |
+| AAAA   | Maps domain → IPv6   |
+| CNAME  | Domain → Domain      |
+| MX     | Mail server          |
+| TXT    | Verification         |
+| Alias  | AWS resource mapping |
+
+### 🚀 Routing Policies (Very Important)
+- Route 53 is powerful because of smart routing.
+
+| Routing Policy         | How It Works                                         | Use Case                         | Supports Health Check | Example Scenario                  |
+| ---------------------- | ---------------------------------------------------- | -------------------------------- | --------------------- | --------------------------------- |
+| **Simple**             | Routes traffic to a single resource                  | Basic domain mapping             | ❌ No                  | `example.com → ALB`               |
+| **Weighted**           | Distributes traffic by percentage                    | Canary / Blue-Green deployment   | ✅ Yes                 | 80% → v1, 20% → v2                |
+| **Latency-Based**      | Routes to region with lowest latency                 | Global apps                      | ✅ Yes                 | India → Mumbai, US → Virginia     |
+| **Failover**           | Primary → Secondary if health fails                  | Disaster recovery                | ✅ Required            | Active-Passive DR                 |
+| **Geolocation**        | Routes based on user country                         | Region-specific content          | ✅ Yes                 | US users → US server              |
+| **Geoproximity**       | Routes based on geographic distance (can shift bias) | Traffic shifting between regions | ✅ Yes                 | Shift 20% traffic from EU to Asia |
+| **Multi-Value Answer** | Returns multiple healthy IPs                         | Basic load balancing             | ✅ Yes                 | Multiple EC2 IPs returned         |
+| **IP-Based Routing**   | Routes based on client IP CIDR                       | Enterprise routing rules         | ❌ No                  | Corporate IP → Internal endpoint  |
