@@ -316,3 +316,46 @@ After 365 days → Delete
  
 ***A Load Balancer distributes incoming traffic across multiple backend targets grouped in a Target Group. Auto Scaling dynamically adjusts the number of backend instances based on metrics such as CPU utilization. When new instances are launched, they are automatically registered with the load balancer’s target group, and when terminated, they are deregistered to ensure seamless traffic distribution and high availability.***
 
+## Amazon API Gateway 
+- Amazon API Gateway  is a fully managed service from Amazon Web Services
+that allows you to:
+- Create APIs (REST / HTTP / WebSocket)
+- Secure them
+- Throttle them
+- Monitor them
+- Integrate them with backend services
+- It gives:
+  - ✔ Authentication
+  - ✔ Rate limiting
+  - ✔ Logging
+  - ✔ Monitoring
+  - ✔ Caching
+  - ✔ Security
+
+  | Feature                | API Gateway | ALB      |
+| ---------------------- | ----------- | -------- |
+| Layer                  | 7           | 7        |
+| Rate limiting          | Yes         | Limited  |
+| API Keys               | Yes         | No       |
+| Authentication         | Advanced    | Basic    |
+| Serverless integration | Native      | Indirect |
+| Cost                   | Higher      | Lower    |
+
+## CDN (Content Delivery Network)
+- A CDN (Content Delivery Network) is a globally distributed network of servers that: Delivers content to users from the nearest geographic location.
+- CDN improves:
+  - ✔ Speed
+  - ✔ Performance
+  - ✔ Global availability
+  - ✔ Security
+  - ✔ Reduced backend load
+ 
+| Feature         | CDN       | ALB      |
+| --------------- | --------- | -------- |
+| Global presence | Yes       | Regional |
+| Caching         | Yes       | No       |
+| Static content  | Excellent | No       |
+| Dynamic routing | Limited   | Yes      |
+| Used for APIs   | Sometimes | Yes      |
+
+***A CDN is a globally distributed network that caches content at edge locations closer to users to reduce latency and improve performance. In AWS, CloudFront is used as a CDN and can sit in front of S3, ALB, or API Gateway to accelerate content delivery and enhance security.***
