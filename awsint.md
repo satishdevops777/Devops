@@ -511,3 +511,54 @@ S3
 | Monitoring   | CloudWatch + alarms       |
 
 
+## CNAPP - Cloud Native Application Protection Platform
+
+### It is a unified security platform that protects:
+- Cloud infrastructure
+- Containers
+- Kubernetes
+- Serverless
+- IAM
+- Data
+- CI/CD pipelines
+
+- Instead of separate tools for each layer, CNAPP combines:
+
+| Security Area          | Included |
+| ---------------------- | -------- |
+| CSPM                   | Yes      |
+| CWPP                   | Yes      |
+| CIEM                   | Yes      |
+| IaC scanning           | Yes      |
+| Vulnerability scanning | Yes      |
+| Container scanning     | Yes      |
+
+## CSPM = Cloud Security Posture Management
+- Focuses on:
+  - Misconfigurations in cloud accounts
+
+Example issues:
+- Public S3 buckets
+- Open Security Groups (0.0.0.0/0)
+- Unencrypted EBS
+- Disabled CloudTrail
+- Weak IAM policies
+- CSPM checks against:
+- CIS Benchmarks: NIST, SOC2, PCI-DSS, GDPR
+
+- It scans via:
+  - ✔ Cloud APIs
+  - ✔ Read-only IAM access
+  - No agents required.
+
+## CWPP = Cloud Workload Protection Platform
+- Focuses on:
+  - Runtime workload security
+  - Protects: EC2, Containers, Kubernetes nodes, Serverless
+  - Detects: Vulnerabilities, Malware, Privilege escalation, Suspicious processes, Crypto mining, Kernel exploits
+  - CWPP may use:
+    - ✔ Agents
+    - ✔ Agentless scanning
+    - ✔ Runtime monitoring
+
+
