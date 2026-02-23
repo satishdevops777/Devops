@@ -591,3 +591,27 @@ Example issues:
 ***I would start by identifying whether the issue is network, application, or authorization related, then systematically isolate layers beginning with DNS and load balancer, moving through security groups and routing, and finally verifying IAM permissions and application logs.***
 
 ***Chaos engineering is the practice of proactively injecting controlled failures into distributed systems to validate resilience, failover mechanisms, and recovery processes before real outages occur.***
+
+```
+netstat -an
+```
+
+| State        | Meaning                       |
+| ------------ | ----------------------------- |
+| LISTEN       | Waiting for connection        |
+| SYN_SENT     | Sent SYN                      |
+| SYN_RECEIVED | Received SYN                  |
+| ESTABLISHED  | Active connection             |
+| FIN_WAIT     | Closing                       |
+| TIME_WAIT    | Waiting for delayed packets   |
+| CLOSE_WAIT   | Remote closed, app not closed |
+
+## Triage Strategy
+```
+Layer 1 — DNS
+Layer 2 — Network path
+Layer 3 — Security controls
+Layer 4 — Application health
+Layer 5 — IAM/authorization
+```
+Never jump randomly.
