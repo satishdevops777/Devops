@@ -1184,3 +1184,29 @@ Example: Deploying Prometheus
 helm install prometheus prometheus-community/kube-prometheus-stack
 ```
 ***A finalizer is a metadata field on a Kubernetes resource that blocks deletion until a controller performs necessary cleanup operations. It ensures external dependencies such as cloud load balancers or persistent volumes are properly cleaned before the resource is fully removed.***
+
+
+## Taints & Tolerations
+- A taint is applied to a node.
+```
+key=value:effect
+```
+
+- Common effects
+  - NoSchedule → new pods won’t be scheduled
+  - PreferNoSchedule → avoid if possible
+  - NoExecute → evict running pods
+  ```
+  kubectl taint node node1 infra=true:NoSchedule # Node says: “Only infra pods are allowed here.”
+  ```
+
+- A toleration is applied to a pod.
+  ```
+  tolerations:
+  - key: "infra"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  ```
+
+- Node affinity attracts pods to nodes based on labels.
