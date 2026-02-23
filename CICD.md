@@ -571,3 +571,130 @@ kubectl --token=$K8S_TOKEN \
 | Cloud integration | Native        |
 | Compliance        | Strong        |
 
+
+
+```
+Code Push
+  ↓
+Build
+  ↓
+SonarQube (Quality Gate)
+  ↓
+Checkmarx (SAST – Code Security)
+  ↓
+Docker Build
+  ↓
+Trivy (Image / IaC Scan)
+  ↓
+Deploy
+```
+
+```
+SONAR_HOST_URL
+SONAR_TOKEN
+
+CHECKMARX_SERVER
+CHECKMARX_USERNAME
+CHECKMARX_PASSWORD
+CHECKMARX_TEAM
+```
+
+```
+stages:
+  - build
+  - quality
+  - security
+  - image
+  - deploy
+
+variables:
+  GIT_DEPTH: "0"
+  DOCKER_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+
+# --------------------
+# BUILD STAGE
+# --------------------
+build:
+  stage: build
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - mvn clean package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+  only:
+    - merge_requests
+    - main
+
+# --------------------
+# SONARQUBE – CODE QUALITY
+# --------------------
+sonarqube_scan:
+  stage: quality
+  image: sonarsource/sonar-scanner-cli:latest
+  script:
+    - sonar-scanner
+      -Dsonar.projectKey=$CI_PROJECT_NAME
+      -Dsonar.sources=.
+      -Dsonar.host.url=$SONAR_HOST_URL
+      -Dsonar.login=$SONAR_TOKEN
+  allow_failure: false
+  only:
+    - merge_requests
+    - main
+
+# --------------------
+# CHECKMARX – SAST SECURITY
+# --------------------
+checkmarx_scan:
+  stage: security
+  image: checkmarx/cx-flow:latest
+  script:
+    - java -jar cx-flow.jar
+      --scan
+      --project-name "$CI_PROJECT_NAME"
+      --cx-server "$CHECKMARX_SERVER"
+      --cx-username "$CHECKMARX_USERNAME"
+      --cx-password "$CHECKMARX_PASSWORD"
+      --cx-team "$CHECKMARX_TEAM"
+      --branch "$CI_COMMIT_REF_NAME"
+  allow_failure: false
+  only:
+    - merge_requests
+    - main
+
+# --------------------
+# DOCKER IMAGE BUILD
+# --------------------
+docker_build:
+  stage: image
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t $DOCKER_IMAGE .
+  only:
+    - main
+
+# --------------------
+# TRIVY – IMAGE & IaC SCAN
+# --------------------
+trivy_scan:
+  stage: image
+  image: aquasec/trivy:latest
+  script:
+    - trivy image --severity HIGH,CRITICAL --exit-code 1 $DOCKER_IMAGE
+  allow_failure: false
+  only:
+    - main
+
+# --------------------
+# DEPLOY
+# --------------------
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to production..."
+  only:
+    - main
+```
