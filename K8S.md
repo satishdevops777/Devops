@@ -410,7 +410,35 @@ kubectl patch deployment payment-deploy \
   failureThreshold: 3 # After 3 consecutive failed probes, mark the pod as NOT READY.
   ```
 - Traffic only goes to Pods that pass readiness.
+- Is this container healthy, or should it be restarted?
+  ```
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 2
+    failureThreshold: 3
+  ```
+- Don’t use liveness yet — my app is still starting.”
+- It is designed ONLY for slow-starting applications.
+  ```
+  startupProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  periodSeconds: 10
+  failureThreshold: 30
+  ```
+| Probe         | Purpose                | Failure Result          |
+| ------------- | ---------------------- | ----------------------- |
+| **Readiness** | Can receive traffic?   | Removed from Service    |
+| **Liveness**  | App alive?             | Container restarted     |
+| **Startup**   | App finished starting? | Keeps liveness disabled |
 
+
+  
 ### 2️⃣ Proper Resource Requests
 - If new Pods can’t schedule (insufficient CPU/memory):
 - Deployment may stall.
