@@ -589,3 +589,5 @@ Example issues:
 | Cross-VPC failure                | Route table missing      |
 
 ***I would start by identifying whether the issue is network, application, or authorization related, then systematically isolate layers beginning with DNS and load balancer, moving through security groups and routing, and finally verifying IAM permissions and application logs.***
+
+***Chaos engineering is the practice of proactively injecting controlled failures into distributed systems to validate resilience, failover mechanisms, and recovery processes before real outages occur.***
