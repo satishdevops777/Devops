@@ -561,4 +561,31 @@ Example issues:
     - ✔ Agentless scanning
     - ✔ Runtime monitoring
 
+## TCP/IP – Core Networking Foundation
+- TCP/IP – Core Networking Foundation
 
+## IP (Layer 3 – Routing)
+- Identifies a host (e.g., 10.0.1.15)
+- Used in VPC CIDR blocks (e.g., 10.0.0.0/16)
+- Routing tables decide where packets go
+
+## TCP (Layer 4 – Reliable Transport)
+- Connection-oriented
+- 3-way handshake (SYN → SYN-ACK → ACK)
+- Used by HTTP, HTTPS, SSH, databases
+
+##🔹 UDP
+- No handshake
+- Used by DNS, streaming, monitoring
+
+| Problem                          | Root Cause               |
+| -------------------------------- | ------------------------ |
+| Timeout                          | SG/NACL blocked          |
+| Refused                          | App not listening        |
+| 502                              | Unhealthy backend        |
+| 504                              | Backend slow             |
+| Cannot assume role               | Trust relationship issue |
+| Works internally, not externally | SG public access missing |
+| Cross-VPC failure                | Route table missing      |
+
+***I would start by identifying whether the issue is network, application, or authorization related, then systematically isolate layers beginning with DNS and load balancer, moving through security groups and routing, and finally verifying IAM permissions and application logs.***
