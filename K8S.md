@@ -337,6 +337,8 @@ terminationGracePeriodSeconds: 30
   - 💥 At 30s → SIGKIL
   - 💥 Requests terminated → 5xx
 
+***“Rolling updates usually avoid downtime because traffic is shifted gradually, while blue-green deployments can cause downtime if traffic is switched before the new version is fully ready. However, both can be zero-downtime with proper readiness checks and graceful shutdown.”***
+
 ### 3️⃣ Canary Deployment
 - Release new version to small % of users first.
 - Example:
@@ -402,8 +404,10 @@ kubectl patch deployment payment-deploy \
   httpGet:
     path: /health
     port: 8080
-  initialDelaySeconds: 10
-  periodSeconds: 5
+  initialDelaySeconds: 10 # Wait 10 seconds after the container starts before running the first readiness check.
+  periodSeconds: 5   # Run the readiness probe every 5 seconds.
+  timeoutSeconds: 2  # If /health does not respond within 2 seconds, that probe attempt is considered FAILED.
+  failureThreshold: 3 # After 3 consecutive failed probes, mark the pod as NOT READY.
   ```
 - Traffic only goes to Pods that pass readiness.
 
