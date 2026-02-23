@@ -394,3 +394,15 @@ A Dockerfile is a text file with instructions to build a Docker image. Below are
 - Enabling DevOps practices like Continuous Deployment and Blue-Green Deployments.
 
 By leveraging Docker and Kubernetes together, organizations achieve agility, resilience, and efficiency in their software delivery and operations.
+
+## Docker Networks
+| Network Type | Use Case                        |
+| ------------ | ------------------------------- |
+| **bridge**   | Default, container-to-container |
+| **host**     | High performance, no isolation  |
+| **none**     | Full isolation                  |
+| **overlay**  | Multi-host (Docker Swarm)       |
+| **macvlan**  | Container gets real IP          |
+
+- “Bridge is default, host is fastest but risky, overlay is for multi-host, and macvlan gives containers real IPs.”
+
