@@ -326,7 +326,16 @@ selector:
 terminationGracePeriodSeconds: 30
 ```
 - App has 30 seconds to finish active requests.
-
+  - t = 0s   Pod gets SIGTERM
+  - t = 1s   Load balancer stops sending traffic
+  - t = 2s   App stops accepting new requests
+  - t = 5s   In-flight requests still running
+  - t = 30s  SIGKILL if app hasn’t exited
+- Grace Period Too Short
+  - In-flight requests need 60s
+  - Grace period = 30s
+  - 💥 At 30s → SIGKIL
+  - 💥 Requests terminated → 5xx
 
 ### 3️⃣ Canary Deployment
 - Release new version to small % of users first.
