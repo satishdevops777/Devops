@@ -20,6 +20,7 @@
 - Synthetic checks failing
 
 ### 2️⃣ Triage
+- Issues are ranked (critical → high → medium → low) to decide what gets fixed first.
 - Is it real?
 - How severe is it?
 - Who is impacted?
