@@ -391,6 +391,10 @@ server {
     server_name {{ server_name }};
 }
 ```
+```yml
+ansible-doc -l
+ansible-doc file
+```
 
 ## 11. Playbook Execution Modes
 These modes help you test your playbooks safely before applying changes.
@@ -657,6 +661,10 @@ You can control task behavior on failure.
 **Stop all on error**
 ```YAML
 any_errors_fatal: true
+```
+```yml
+serial: 2
+max_fail_percentage: 20
 ```
 ### ⛔ Stop play on all hosts if any host fails
 ## 22. Ansible Vault
