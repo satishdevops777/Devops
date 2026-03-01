@@ -4,6 +4,7 @@
 - Every time a developer writes code, CI/CD automatically builds, tests, secures, and deploys it.
 
 ### 1️⃣ Continuous Integration (CI)
+- CI is the practice of automatically building and testing code whenever developers push changes.
 - Goal: Catch problems early.
 - Whenever a developer pushes code to Git:
 	- What happens automatically?
@@ -15,21 +16,48 @@
 		- No “it works on my machine” ❌
 		- Bugs are caught in minutes, not weeks
 		- Team can merge code confidently
+    ```
+    Developer → Git Push → Build → Test → Success/Fail
+    ```
  
 ### 2️⃣ Continuous Delivery (CD)
+- Code is automatically prepared for release but requires manual approval to deploy.
 - Goal: Keep the app always ready to deploy.
 	- App is built
 	- Tested
 	- Security-scanned
 	- Stored as a release artifact
 🚦 Deployment may require manual approval
-
+```
+Build → Test → Package → Ready for Production (Manual Approval)
+```
 ### 3️⃣ Continuous Deployment (CD – advanced)
+- Code is automatically deployed to production without manual approval.
 - Goal: Zero human intervention.
 - If all checks pass:
 	➡️ Automatically deploy to production
 - Used by companies like Netflix, Amazon, Google.
+```
+Build → Test → Deploy to Production (Fully Automatic)
+```
 
+| Continuous Delivery         | Continuous Deployment |
+| --------------------------- | --------------------- |
+| Manual approval before prod | Fully automatic       |
+| Safer                       | Faster                |
+| Used in enterprises         | Used in startups      |
+
+```
+1. Developer pushes code
+2. CI runs:
+   - Build
+   - Unit test
+   - Static scan
+3. CD runs:
+   - Build Docker image
+   - Push to registry
+   - Deploy to Kubernetes
+```
 
 ### 1️⃣ COMPLETE PROJECT STRUCTURE
 ```bash
