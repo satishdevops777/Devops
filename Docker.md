@@ -406,3 +406,30 @@ By leveraging Docker and Kubernetes together, organizations achieve agility, res
 
 - “Bridge is default, host is fastest but risky, overlay is for multi-host, and macvlan gives containers real IPs.”
 
+- Over time Docker fills your system with:
+  - ❌ Stopped containers
+  - ❌ Unused images
+  - ❌ Unused networks
+  - ❌ Unused volumes
+- This wastes:
+  - Disk space
+  - Memory
+  - System performance
+
+| Command                  | Removes            |
+| ------------------------ | ------------------ |
+| `docker container prune` | Stopped containers |
+| `docker image prune`     | Unused images      |
+| `docker network prune`   | Unused networks    |
+| `docker volume prune`    | Unused volumes     |
+| `docker system prune`    | Almost everything  |
+
+```
+docker system df
+```
+Shows:
+- Images size
+- Containers size
+- Volumes size
+- Cache size
+
