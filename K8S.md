@@ -215,17 +215,17 @@ Pod A → eBPF → Pod B
   cilium endpoint list
   cilium service list
   ```
-| Feature             | kube-proxy     | Calico     | Cilium     |
-| ------------------- | -------------- | ---------- | ---------- |
-| Type                | Node component | CNI plugin | CNI plugin |
-| Pod networking      | ❌              | ✅          | ✅          |
-| Service handling    | ✅              | ❌          | ✅          |
-| kube-proxy required | —              | ✅          | ❌          |
-| NetworkPolicy       | ❌              | L3/L4      | L3–L7      |
-| iptables used       | ✅              | ✅          | ❌          |
-| eBPF used           | ❌              | Partial    | ✅          |
-| Performance         | Medium         | Good       | Excellent  |
-| Observability       | None           | Basic      | Advanced   |
+    | Feature             | kube-proxy     | Calico     | Cilium     |
+    | ------------------- | -------------- | ---------- | ---------- |
+    | Type                | Node component | CNI plugin | CNI plugin |
+    | Pod networking      | ❌              | ✅          | ✅          |
+    | Service handling    | ✅              | ❌          | ✅          |
+    | kube-proxy required | —              | ✅          | ❌          |
+    | NetworkPolicy       | ❌              | L3/L4      | L3–L7      |
+    | iptables used       | ✅              | ✅          | ❌          |
+    | eBPF used           | ❌              | Partial    | ✅          |
+    | Performance         | Medium         | Good       | Excellent  |
+    | Observability       | None           | Basic      | Advanced   |
 
   
   ### 🔹 Container Runtime
@@ -278,7 +278,22 @@ kubectl version --short
 ## 1. Pods
 
 A Pod is the smallest deployable unit in Kubernetes, which can contain one or more containers that share the same network namespace.
+- Pods exist to:
+  - Run tightly coupled containers together
+  - Share localhost networking
+  - Share files via volumes
+  - Start/stop together
 
+### 🧠 WHY in one line:
+- A Pod groups containers that must live and die together.
+
+### Pod Lifecycle
+States:
+- Pending
+- Running
+- Succeeded
+- Failed
+- Unknown
 Example: Pod YAML Definition
 ```
 apiVersion: v1
@@ -290,12 +305,17 @@ spec:
     - name: nginx
       image: nginx
       ports:
-        - containerPort: 80
+        - containerPort: 80 # Port the application listens on inside the container
+        - port: 80 # Port exposed by the Service & Clients connect to this port
+        - targetPort: 8080 # Port on the Pod where traffic is sent
 ```
 Command to create a pod:
 ```
+Client → ServiceIP:port → targetPort → Container
+Client → 10.96.0.1:80 → PodIP:8080 → App
 kubectl apply -f pod.yaml
 ```
+***A Pod is the smallest deployable unit in Kubernetes. It represents one or more containers that share the same network namespace, storage volumes, and lifecycle. Kubernetes schedules Pods, not containers.***
 
 ## 2. ReplicaSets
 
@@ -478,7 +498,7 @@ selector:
 
 ```
 ```
-terminationGracePeriodSeconds: 30
+terminationGracePeriodSeconds: 30  # how long Kubernetes waits for a Pod to shut down gracefully before force killing it.
 ```
 - App has 30 seconds to finish active requests.
   - t = 0s   Pod gets SIGTERM
@@ -498,8 +518,33 @@ terminationGracePeriodSeconds: 30
 - Release new version to small % of users first.
 - Example:
   ```
+    # v1
+  labels:
+    app: web
+    version: v1
+  
+  # v2 (canary)
+  labels:
+    app: web
+    version: v2
+  
   90% traffic → v1
   10% traffic → v2
+
+  # Service selects both
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: web-svc
+  spec:
+    selector:
+      app: web
+
+  metadata:
+  name: web-canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "20"
   ```
 - If stable → increase traffic gradually.
 
