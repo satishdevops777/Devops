@@ -7,13 +7,14 @@ Kubernetes is an open-source container orchestration platform that automates the
   - Worker Nodes 
 
 ### 1️⃣ Control Plane (Cluster Brain)
-  - The Control Plane makes decisions.
+  - This is the brain of the cluster. It decides what should run, where it should run, and keeps the desired state.
   - It runs these core components:
 
   ### 🔹 API Server (kube-apiserver)
   - What it does:
-    - Entry point to Kubernetes.
-    - All commands go through it.
+    - Entry point for all operations
+    - Used by kubectl, UI dashboards, CI/CD tools
+    - Validates requests and updates cluster state
       ```
       kubectl apply -f app.yaml
       ```
@@ -25,6 +26,7 @@ Kubernetes is an open-source container orchestration platform that automates the
   - Key-value store
   - Stores all cluster state
   - Source of truth
+  - must be backed up
   - Example:
     - If you deploy 3 replicas, etcd stores:
       ```
@@ -45,6 +47,9 @@ Kubernetes is an open-source container orchestration platform that automates the
   
   ### 🔹 Controller Manager (kube-controller-manager)
   - Ensures desired state = actual state.
+  - Node Controller
+  - Deployment/ReplicaSet Controller
+  - Endpoint Controller
   - Example:
   - You say:
     ```
@@ -75,13 +80,154 @@ Kubernetes is an open-source container orchestration platform that automates the
   
 
   ### 🔹 Kube-Proxy
+  - kube-proxy is the Kubernetes network traffic enforcer
+  - It makes Services work by routing traffic to the right Pods.
   - Handles networking.
   - It:
+  - Pods are dynamic (IPs change)
+  - Services are stable (virtual IP & DNS)
+  - kube-proxy bridges this gap.
     - Routes traffic
     - Implements Services
     - Manages iptables rules
     - Example: Service IP → forwards traffic to correct Pod.
 
+***Both Cilium and Calico are CNI (Container Network Interface) solutions for Kubernetes, but they are built on very different philosophies.***
+
+
+### Modern Alternatives (Advanced)
+- Some CNI plugins replace kube-proxy:
+  - Cilium → eBPF-based (no iptables)
+  - Calico (partial replacement)
+  - These offer:
+    - Better performance
+    - Deep observability
+    - Network policies at kernel level
+    
+### What is Calico?
+- Calico provides:
+  - Pod-to-Pod networking
+  - Network Policies (who can talk to whom)
+  - It mainly uses Linux routing + iptables.
+### Pre-requisites
+  - Kubernetes cluster up
+  - kube-proxy enabled (default)
+
+```
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml #Install Calico
+kubectl get pods -n kube-system
+# you will see
+calico-node-xxxxx
+calico-kube-controllers-xxxxx
+```
+📌 calico-node runs on every node (DaemonSet)
+
+### How calico works
+
+- On each node:
+- Creates veth pair for each Pod
+- Assigns Pod IP
+- Programs iptables rules
+- Updates Linux routing table
+
+***A veth pair (Virtual Ethernet pair) is a pair of connected virtual network interfaces used in Linux networking.***
+### 🔹 How it works
+- You create a veth pair:
+  - veth0 ↔ veth1
+- Put one end in:
+  - a container / pod
+- Keep the other end in:
+  - the host network namespace
+- Connect the host end to:
+  - a bridge (like docker0 or cni0)
+📦 Result: the container can talk to the outside network.
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+spec:
+  podSelector:
+    matchLabels:
+      run: backend
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          run: frontend
+```
+### What is Cilium
+- Cilium:
+  - Uses eBPF inside Linux kernel
+  - Can replace kube-proxy
+  - Supports L3–L7 policies
+  - Provides deep visibility
+📌 No iptables in data path.
+```
+curl -L --remote-name https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64
+sudo install cilium-linux-amd64 /usr/local/bin/cilium
+cilium install --kube-proxy-replacement=true
+kubectl get pods -n kube-system
+```
+📌 cilium-agent runs on every node
+
+- Instead of iptables:
+  - Attaches eBPF programs to:
+  - Network interfaces
+  - Socket layer
+  - Traffic handled inside kernel
+```
+Pod A → eBPF → Pod B
+```
+
+### Scenario
+- Allow only HTTP GET requests
+- Block POST requests
+  ```
+  apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+  metadata:
+    name: l7-http-policy
+  spec:
+    endpointSelector:
+      matchLabels:
+        run: backend
+    ingress:
+    - fromEndpoints:
+      - matchLabels:
+          run: frontend
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+        rules:
+          http:
+          - method: "GET"
+    ```
+  🔹 Result
+    - ✔ GET allowed
+    - ❌ POST blocked
+
+  ```
+  iptables -L -n
+  ip route
+  cilium monitor
+  cilium endpoint list
+  cilium service list
+  ```
+| Feature             | kube-proxy     | Calico     | Cilium     |
+| ------------------- | -------------- | ---------- | ---------- |
+| Type                | Node component | CNI plugin | CNI plugin |
+| Pod networking      | ❌              | ✅          | ✅          |
+| Service handling    | ✅              | ❌          | ✅          |
+| kube-proxy required | —              | ✅          | ❌          |
+| NetworkPolicy       | ❌              | L3/L4      | L3–L7      |
+| iptables used       | ✅              | ✅          | ❌          |
+| eBPF used           | ❌              | Partial    | ✅          |
+| Performance         | Medium         | Good       | Excellent  |
+| Observability       | None           | Basic      | Advanced   |
+
+  
   ### 🔹 Container Runtime
   - Runs containers.
   - Examples:
@@ -103,6 +249,15 @@ kubectl apply -f nginx.yaml
 - etcd stores desired state
 - Scheduler picks a node
 - Kubelet starts container
+  - 🔁 Execution Flow
+    - Pod assigned to a node
+    - kubelet reads Pod spec
+    - kubelet calls CRI APIs
+    - Runtime creates containers
+    - kubelet monitors and reports status
+  ```
+  💡 kubelet → CRI → container runtime
+  ```
 - Service exposes it
 - Controller ensures it stays running
 - If Pod crashes:
