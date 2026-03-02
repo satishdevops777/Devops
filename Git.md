@@ -1,5 +1,15 @@
 # Git (Distributed Version Control System)
 
+- Git is a tool to track changes in your code over time.
+- Git has 3 main areas
+  
+  | Area              | Meaning              |
+  | ----------------- | -------------------- |
+  | Working Directory | Where you edit files |
+  | Staging Area      | Files ready to save  |
+  | Repository        | Saved history        |
+  
+
 ## Git Branching Strategies
 
 1. **Master/Main**: The up-to-date code branch where the latest production-ready code resides.
@@ -58,11 +68,13 @@
 
 ## Remote Repositories
 
-- **`git remote add <name> <url>`**: Adds a new remote repository.
-- **`git remote -v`**: Lists the configured remote repositories.
+- **`git remote add <name> <url>`**: Adds a new remote repository. Now Git knows where to push & pull
+- **`git remote -v`**: Lists the configured remote repositories with URL
 - **`git push <remote> <branch>`**: Pushes commits to the specified branch of the remote repository.
 - **`git pull <remote> <branch>`**: Fetches and merges changes from the remote repository into the current branch.
 - **`git fetch <remote>`**: Downloads commits, files, and refs from a remote repository.
+- **`git remote remove origin`**: Remove a remote
+- **`git remote set-url origin NEW_URL`: Change remote URL
 
 | Command   | Downloads changes | Merges changes | Risk     |
 | --------- | ----------------- | -------------- | -------- |
@@ -73,7 +85,8 @@
 
 ## Undoing Changes
 
-- **`git checkout -- <file>`**: Discards changes in the specified file.
+- **`git checkout -- <file>`**: Reset this file back to how it was in the last commit. It only undoes working directory changes, not staged or commited changes.
+- **`git restore file`**:
 - **`git reset <file>`**: Unstages a staged file and keep the changes.
   ```
   git reset --soft HEAD~1
@@ -90,6 +103,13 @@
 | git restore | Undo file changes      |
 
 - git reset is used to move the current branch pointer to a specific commit and optionally reset the staging area and working directory. It has soft, mixed, and hard modes depending on how much history and changes you want to undo.
+
+| Command   | Commit    | Staging   | Working Dir |
+| --------- | --------- | --------- | ----------- |
+| `--soft`  | ❌ removed | ✅ kept    | ✅ kept      |
+| `--mixed` | ❌ removed | ❌ cleared | ✅ kept      |
+| `--hard`  | ❌ removed | ❌ cleared | ❌ cleared   |
+
 ---
 
 ## Viewing Changes
