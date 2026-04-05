@@ -281,7 +281,34 @@
 
 ***Hard Link vs Soft Link (Symbolic Link)***
 
-  <img width="829" height="592" alt="image" src="https://github.com/user-attachments/assets/562dc080-5eda-4e26-8ce2-493d61ee4ba4" />
+***Hard Link***
+- A hard link is another name for the same file (same inode).
+- Both the original file and the hard link are equal—there’s no “original vs copy.”
+- If you delete one, the file still exists as long as at least one hard link remains.
+- Example
+  ```
+  ln file.txt hardlink.txt
+  ```
+- Key properties
+	- Points directly to the file data (inode).
+	- Cannot link to directories (usually, for safety).
+	- Must be on the same filesystem/partition.
+	- Deleting the original file does not delete the data if a hard link exists.
+
+
+***Soft Link (Symbolic Link / Symlink)***
+- A soft link is like a shortcut—it points to the file’s path, not the data itself.
+- If the original file is deleted, the soft link becomes broken (dangling).
+- Example
+  ```
+  ln -s file.txt softlink.txt
+  ```
+- Key properties
+	- Points to the file path (name).
+	- Can link to directories.
+	- Can cross different filesystems.
+	- Becomes invalid if the target file is removed.
+
 
 ***Command Syntax***
 	⁃	Cmd options arguments
