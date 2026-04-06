@@ -75,6 +75,17 @@ retry_files_enabled = False
 - `forks`: Determines how many hosts Ansible can connect to in parallel.
 - `host_key_checking`: Disables SSH prompt on first connection.
 - `retry_files_enabled`: Disables creation of `.retry` files.
+  ```
+  ansible-playbook site.yml
+  site.retry #If some hosts fail, you’ll see a file like:
+  
+  It contains a list of failed hosts, for example:
+  web1
+  web2
+  db3
+  
+  ansible-playbook site.yml --limit @site.retry
+  ```
 
 ## 3. YAML (Yet Another Markup Language)
 
