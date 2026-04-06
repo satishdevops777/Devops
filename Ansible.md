@@ -305,11 +305,11 @@ ansible localhost -m setup # Gather and print all facts
 ```
 ***How fact gathering is controlled in ansible.cfg***
 
-| Mode       | Meaning                                   |
-| ---------- | ----------------------------------------- |
-| `implicit` | (Default) Gather facts automatically      |
-| `explicit` | Only gather facts if `gather_facts: true` |
-| `smart`    | Cache-aware fact gathering                |
+| Mode       | Meaning                                                             |
+| ---------- | -----------------------------------------                           |
+| `implicit` | (Default) Gather facts automatically                                |
+| `explicit` | Only gather facts if `gather_facts: true`                           |
+| `smart`    | Cache-aware fact gathering, already gahthered re-use                |
 
 
 ***Smart gathering with cache***
