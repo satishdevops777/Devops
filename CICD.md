@@ -53,9 +53,10 @@ Build → Test → Deploy to Production (Fully Automatic)
    - Build
    - Unit test
    - Static scan
-3. CD runs:
    - Build Docker image
    - Push to registry
+3. CD runs:
+   - Pulls specific tagged image
    - Deploy to Kubernetes
 ```
 
